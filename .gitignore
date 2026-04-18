@@ -30,6 +30,7 @@ staticfiles/
 # Java / JVM crash logs
 hs_err_pid*.log
 replay_pid*.log
+*.hprof
 
 # Backend
 backend/.env
