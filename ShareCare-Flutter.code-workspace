@@ -1,0 +1,24 @@
+{
+  "folders": [
+    {
+      "name": "ShareCare Flutter",
+      "path": "frontendsharecare"
+    }
+  ],
+  "settings": {
+    "dart.flutterSdkPath": "D:\\Flutter",
+    "dart.env": {
+      "ANDROID_HOME": "D:\\Android\\Sdk",
+      "ANDROID_SDK_ROOT": "D:\\Android\\Sdk",
+      "PUB_CACHE": "D:\\PubCache"
+    },
+    "gradle.autoDetect": "off",
+    "java.gradle.buildServer.enabled": "off",
+    "java.import.gradle.enabled": false,
+    "java.import.gradle.wrapper.enabled": false,
+    "java.autobuild.enabled": false,
+    "java.server.launchMode": "LightWeight",
+    "jdk.jdkhome": "D:\\Java\\jdk-17.0.18.8-hotspot",
+    "java.jdt.ls.java.home": "D:\\Java\\jdk-17.0.18.8-hotspot"
+  }
+}

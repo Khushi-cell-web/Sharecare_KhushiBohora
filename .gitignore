@@ -1,0 +1,46 @@
+# Environment
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Django
+*.log
+db.sqlite3
+media/
+staticfiles/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Java / JVM crash logs
+hs_err_pid*.log
+replay_pid*.log
+
+# Backend
+backend/.env
+backend/db.sqlite3
+backend/__pycache__/
+backend/**/__pycache__/
+
+# Flutter / frontendsharecare
+frontendsharecare/.dart_tool/
+frontendsharecare/.packages
+frontendsharecare/build/
+frontendsharecare/*.iml
+frontendsharecare/.metadata
+frontendsharecare/android/.gradle/
