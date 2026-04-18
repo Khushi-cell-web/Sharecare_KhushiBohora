@@ -1,0 +1,155 @@
+/* custom_admin.css */
+
+/* Global Dark Theme Settings */
+body, .wrapper, .content-wrapper {
+    background-color: #12131C !important;
+    color: #9ba0af;
+}
+
+/* Sidebar Customizations */
+.main-sidebar {
+    background-color: #1A1C23 !important;
+    border-right: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+/* Sidebar Brand Logo Area */
+.brand-link {
+    background-color: #1A1C23 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+/* Sidebar Links */
+.nav-sidebar .nav-item > .nav-link {
+    color: #9ba0af !important;
+    border-radius: 8px !important;
+    margin: 5px 10px;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+}
+
+/* Active Sidebar Link / Hover State */
+.nav-sidebar .nav-item > .nav-link.active,
+.nav-sidebar .nav-item > .nav-link:hover {
+    background-color: #2D303D !important;
+    color: #ffffff !important;
+}
+
+/* Header/Navbar */
+.main-header {
+    background-color: #12131C !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+.main-header .nav-link {
+    color: #9ba0af !important;
+}
+
+/* Cards (Widgets & Tables) */
+.card {
+    background-color: #1A1C23 !important;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    background-color: transparent !important;
+    color: #ffffff !important;
+    padding: 15px 20px;
+}
+
+.card-title {
+    font-weight: 500;
+    font-size: 16px;
+    color: #e2e8f0;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Tables Customization */
+table.dataTable {
+    color: #9ba0af !important;
+}
+
+table.dataTable thead th {
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    color: #ffffff;
+    background-color: #1A1C23;
+}
+
+table.dataTable tbody tr {
+    background-color: transparent !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+table.dataTable tbody td {
+    border-color: rgba(255,255,255,0.05) !important;
+}
+
+/* Buttons pill-shape style */
+.btn {
+    border-radius: 50px !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 8px 20px;
+}
+
+.btn-primary, .btn-info {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+}
+
+.btn-success {
+    background-color: #10b981 !important;
+    border-color: #10b981 !important;
+}
+
+.btn-danger {
+    background-color: #ef4444 !important;
+    border-color: #ef4444 !important;
+}
+
+/* Form Inputs */
+.form-control {
+    background-color: #12131C !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+}
+
+.form-control:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Small Info Boxes */
+.small-box {
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    overflow: hidden;
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #12131C;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #2D303D;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3b82f6;
+}

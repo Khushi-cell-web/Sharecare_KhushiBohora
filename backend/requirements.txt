@@ -1,0 +1,13 @@
+django
+djangorestframework
+psycopg2-binary
+django-cors-headers
+djangorestframework-simplejwt
+python-dotenv
+channels
+daphne
+reportlab
+stripe
+Pillow
+firebase-admin
+django-jazzmin
