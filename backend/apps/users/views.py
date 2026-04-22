@@ -250,11 +250,12 @@ class ForgotPasswordView(generics.GenericAPIView):
 
     def post(self, request):
         logger = logging.getLogger(__name__)
-        logger.info("Email received")
+        logger.info("Forgot password request received")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email'].strip().lower()
         user_id = str(serializer.validated_data['user_id']).strip()
+        logger.info(f"Looking for user: user_id={user_id}, email={email}")
         User = get_user_model()
         
         from django.db.models import Q
@@ -265,7 +266,7 @@ class ForgotPasswordView(generics.GenericAPIView):
         user = User.objects.filter(query, email__iexact=email).first()
         if not user:
             return Response(
-                {'detail': 'User not found.'},
+                {'detail': 'Email or User ID not found.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
@@ -276,7 +277,7 @@ class ForgotPasswordView(generics.GenericAPIView):
                 {'detail': str(e)},
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
-        logger.info("OTP generated")
+        logger.info(f"OTP generated for user {user.username}: {reset.otp}")
         subject = 'ShareCare – Password Reset Code'
         message = (
             f'Hello,\n\n'
@@ -296,15 +297,16 @@ class ForgotPasswordView(generics.GenericAPIView):
             )
             
             if sent == 0:
-                logger.warning('Forgot password: send_mail returned 0 for %s', user.email)
+                logger.warning(f'send_mail returned 0 (not sent) for {user.email}')
                 return Response(
-                    {'detail': 'Failed to send OTP. Please try again.'},
+                    {'detail': 'Failed to send OTP email. Please try again later.'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
             logger.info("Email sent successfully to %s", user.email)
             if settings.DEBUG:
                 print(f"OTP for {email} is {reset.otp}")
+                print("[DEBUG] OTP copy logged to console (email send attempted via configured backend).")
 
             return Response(
                 {'detail': 'OTP sent to your email'},
@@ -312,7 +314,7 @@ class ForgotPasswordView(generics.GenericAPIView):
             )
 
         except Exception as e:
-            logger.exception('Forgot password: failed to send email to %s: %s', user.email, e)
+            logger.exception(f'Failed to send OTP email to {user.email}')
             print(f"Failed to send email: {e}")
             if settings.DEBUG:
                 print(f"OTP for {email} is {reset.otp}")

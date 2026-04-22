@@ -109,6 +109,7 @@ def create_esewa_payment(
 def verify_esewa_mobile_transaction(ref_id: str) -> dict:
     """Verify eSewa mobile SDK transaction."""
     import requests
+    import json as json_module
     
     env = os.getenv('ESEWA_ENVIRONMENT', 'uat').lower()
     
@@ -129,14 +130,62 @@ def verify_esewa_mobile_transaction(ref_id: str) -> dict:
     params = {'txnRefId': ref_id}
     
     try:
-        response = requests.get(url, headers=headers, params=params)
+        print(f"\n[eSewa Verify] URL: {url}")
+        print(f"[eSewa Verify] RefId: {ref_id}")
+        print(f"[eSewa Verify] Merchant ID: {merchant_id[:20]}...")
+        
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        print(f"[eSewa Verify] Status Code: {response.status_code}")
+        print(f"[eSewa Verify] Response: {response.text[:500]}")
+        
         response.raise_for_status()
         data = response.json()
-        if isinstance(data, list) and len(data) > 0:
-            return data[0]
+
+        # eSewa mobile verify can return either a list payload or object payload.
+        if isinstance(data, list):
+            if not data:
+                return {}
+            candidate = data[0] if isinstance(data[0], dict) else {}
+            if not isinstance(candidate, dict):
+                return {}
+            if isinstance(candidate.get('transactionDetails'), dict):
+                return candidate
+            status_val = candidate.get('status') or candidate.get('transactionStatus')
+            return {
+                **candidate,
+                'transactionDetails': {
+                    'status': str(status_val or ''),
+                },
+            }
+
+        if isinstance(data, dict):
+            if isinstance(data.get('transactionDetails'), dict):
+                return data
+            status_val = data.get('status') or data.get('transactionStatus')
+            if status_val is None and isinstance(data.get('data'), dict):
+                nested = data['data']
+                status_val = nested.get('status') or nested.get('transactionStatus')
+            return {
+                **data,
+                'transactionDetails': {
+                    'status': str(status_val or ''),
+                },
+            }
+
+        return {}
+    except requests.exceptions.HTTPError as e:
+        print(f"[eSewa Verify] HTTP Error: {e.response.status_code}")
+        print(f"[eSewa Verify] Response: {e.response.text}")
+        try:
+            error_data = e.response.json()
+            print(f"[eSewa Verify] Error data: {json_module.dumps(error_data, indent=2)}")
+        except:
+            pass
         return {}
     except Exception as e:
-        print(f"Error verifying eSewa mobile transaction: {e}")
+        print(f"[eSewa Verify] Error: {e}")
+        import traceback
+        traceback.print_exc()
         return {}
 
 

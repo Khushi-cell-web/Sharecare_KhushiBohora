@@ -161,11 +161,13 @@ class DonationSerializer(serializers.ModelSerializer):
     """Standalone or linked donation (record)."""
     category_display = serializers.CharField(source='get_category_display', read_only=True)
     type_display = serializers.CharField(source='get_donation_type_display', read_only=True)
-    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    status_display = serializers.SerializerMethodField()
     fulfillment_type_display = serializers.CharField(source='get_fulfillment_type_display', read_only=True)
     delivery_task_id = serializers.SerializerMethodField(read_only=True)
     is_expired = serializers.BooleanField(read_only=True)
     is_near_expiry = serializers.BooleanField(read_only=True)
+    accepted_by_ngo_username = serializers.CharField(source='accepted_by_ngo.username', read_only=True)
+    assigned_volunteer_username = serializers.CharField(source='assigned_volunteer.username', read_only=True)
 
     class Meta:
         model = Donation
@@ -176,10 +178,24 @@ class DonationSerializer(serializers.ModelSerializer):
             'pickup_location', 'pickup_latitude', 'pickup_longitude',
             'delivery_location', 'delivery_latitude', 'delivery_longitude',
             'expiry_date', 'valid_until', 'is_expired', 'is_near_expiry',
+            'accepted_by_ngo', 'accepted_by_ngo_username', 'assigned_volunteer',
+            'assigned_volunteer_username',
             'delivery_task_id',
             'created_at', 'updated_at',
         ]
         read_only_fields = ['donor', 'created_at', 'updated_at']
+
+    def get_status_display(self, obj):
+        label_map = {
+            'pending': 'Pending NGO review',
+            'confirmed': 'Accepted by NGO',
+            'assigned': 'Volunteer assigned',
+            'picked_up': 'Picked up',
+            'in_transit': 'In transit',
+            'completed': 'Delivered',
+            'expired': 'Expired',
+        }
+        return label_map.get(obj.status, obj.get_status_display())
 
     def get_delivery_task_id(self, obj):
         task = obj.volunteer_tasks.order_by('-id').first()
@@ -259,8 +275,6 @@ class DonationCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        from .delivery_service import create_volunteer_task_for_donation_if_needed
-
         user = self.context['request'].user
         validated_data['donor'] = user
         dr = validated_data.get('donation_request')
@@ -268,12 +282,10 @@ class DonationCreateSerializer(serializers.ModelSerializer):
             if validated_data.get('category') == 'blood':
                 validated_data['status'] = 'completed'
             else:
-                validated_data.setdefault('status', 'confirmed')
+                validated_data.setdefault('status', 'pending')
         else:
             validated_data.setdefault('status', 'pending')
-        donation = super().create(validated_data)
-        create_volunteer_task_for_donation_if_needed(donation)
-        return donation
+        return super().create(validated_data)
 
 
 class DonationMatchSerializer(serializers.ModelSerializer):

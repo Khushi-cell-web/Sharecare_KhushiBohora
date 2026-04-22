@@ -1,12 +1,12 @@
 """
 Auto notification triggers: create in-app, email, and FCM push on key events.
 """
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
 
-from apps.donations.models import DonationOffer, DonationRequest
+from apps.donations.models import Donation, DonationOffer, DonationRequest
 from apps.users.models import User
 from apps.volunteers.models import VolunteerTask
 
@@ -18,20 +18,26 @@ def notify(user, notification_type, title, message, target_id=None, target_type=
     """Create in-app notification, send FCM push, and send email."""
     if not user:
         return
-        
-    Notification.objects.create(
-        user=user,
-        notification_type=notification_type,
-        title=title,
-        message=message,
-        target_id=target_id,
-        target_type=target_type or '',
-    )
+
+    valid_types = {choice[0] for choice in Notification.TYPE_CHOICES}
+    safe_type = notification_type if notification_type in valid_types else 'system'
+    try:
+        Notification.objects.create(
+            user=user,
+            notification_type=safe_type,
+            title=title,
+            message=message,
+            target_id=target_id,
+            target_type=target_type or '',
+        )
+    except Exception:
+        # Notification persistence should not block core API workflows.
+        pass
     try:
         send_fcm_to_user(
             user, title, message,
             data={
-                'type': notification_type,
+                'type': safe_type,
                 'target_id': str(target_id or ''),
                 'target_type': target_type or '',
             },
@@ -60,6 +66,59 @@ def _send_email(user, subject, body):
         pass
 
 
+def _notify_volunteers_in_app_only(task_id):
+    """Create lightweight in-app alerts for volunteers without blocking on email/FCM."""
+    volunteers = list(User.objects.filter(role='volunteer', is_active=True).only('id'))
+    if not volunteers:
+        return
+    rows = [
+        Notification(
+            user_id=vol.id,
+            notification_type='system',
+            title='New delivery task',
+            message='A new volunteer pickup task is available. Open Pending pickups to claim.',
+            target_id=task_id,
+            target_type='volunteer_task',
+        )
+        for vol in volunteers
+    ]
+    try:
+        Notification.objects.bulk_create(rows, batch_size=500)
+    except Exception:
+        pass
+
+
+def _task_stakeholders(instance):
+    donor = None
+    ngo = None
+    if instance.donation_id and instance.donation:
+        donor = instance.donation.donor
+        ngo = instance.donation.accepted_by_ngo
+    elif instance.donation_offer_id and instance.donation_offer:
+        donor = instance.donation_offer.donor
+        ngo = instance.donation_request.created_by if instance.donation_request_id else None
+    elif instance.donation_request_id and instance.donation_request:
+        donor = None
+        ngo = instance.donation_request.created_by
+    return donor, ngo
+
+
+@receiver(pre_save, sender=VolunteerTask)
+def on_volunteer_task_pre_save(sender, instance, **kwargs):
+    if not instance.pk:
+        instance._previous_task_status = None
+        instance._previous_volunteer_id = None
+        return
+
+    previous = VolunteerTask.objects.filter(pk=instance.pk).values('task_status', 'volunteer_id').first()
+    if previous:
+        instance._previous_task_status = previous['task_status']
+        instance._previous_volunteer_id = previous['volunteer_id']
+    else:
+        instance._previous_task_status = None
+        instance._previous_volunteer_id = None
+
+
 @receiver(post_save, sender=DonationRequest)
 def on_donation_request_created(sender, instance, created, **kwargs):
     if created:
@@ -71,6 +130,34 @@ def on_donation_request_created(sender, instance, created, **kwargs):
             target_id=instance.pk,
             target_type='donation_request',
         )
+
+
+@receiver(post_save, sender=Donation)
+def on_donation_created(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    ngo_users = list(User.objects.filter(role='ngo', is_active=True).only('id'))
+    if not ngo_users:
+        return
+
+    donor_name = instance.donor.get_full_name() or instance.donor.username
+    donation_title = (instance.description or '').strip().split('\n')[0][:80] or instance.get_category_display()
+    rows = [
+        Notification(
+            user_id=ngo.id,
+            notification_type='donation_created',
+            title='New donation available',
+            message=f'{donor_name} submitted {donation_title}. Open the NGO dashboard to accept it.',
+            target_id=instance.pk,
+            target_type='donation',
+        )
+        for ngo in ngo_users
+    ]
+    try:
+        Notification.objects.bulk_create(rows, batch_size=500)
+    except Exception:
+        pass
 
 
 @receiver(post_save, sender=DonationOffer)
@@ -136,6 +223,8 @@ def _volunteer_task_title(instance):
 
 @receiver(post_save, sender=VolunteerTask)
 def on_volunteer_task_saved(sender, instance, created, **kwargs):
+    previous_status = getattr(instance, '_previous_task_status', None)
+
     if created:
         if instance.volunteer_id:
             notify(
@@ -147,6 +236,7 @@ def on_volunteer_task_saved(sender, instance, created, **kwargs):
                 target_type='volunteer_task',
             )
         else:
+            donor, ngo = _task_stakeholders(instance)
             ngo_msg = (
                 f'A pickup task for "{instance.donation_request.title}" is waiting for a volunteer to claim.'
                 if instance.donation_request_id
@@ -155,26 +245,21 @@ def on_volunteer_task_saved(sender, instance, created, **kwargs):
                     f'(drop-off: {instance.delivery_location[:80]}).'
                 )
             )
-            if instance.donation_request_id:
+            if ngo:
                 notify(
-                    instance.donation_request.created_by,
-                    'request_matched',
+                    ngo,
+                    'donation_assigned',
                     'Volunteer pickup queued',
                     ngo_msg,
-                    target_id=instance.donation_request_id,
-                    target_type='donation_request',
-                )
-            for vol in User.objects.filter(role='volunteer', is_active=True):
-                notify(
-                    vol,
-                    'system',
-                    'New delivery task',
-                    'A new volunteer pickup task is available. Open Pending pickups to claim.',
                     target_id=instance.pk,
                     target_type='volunteer_task',
                 )
+            _notify_volunteers_in_app_only(instance.pk)
     else:
-        if instance.volunteer_id:
+        donor, ngo = _task_stakeholders(instance)
+        status_changed = previous_status != instance.task_status
+
+        if instance.volunteer_id and (status_changed or instance._previous_volunteer_id is None):
             notify(
                 instance.volunteer,
                 'task_status_updated',
@@ -183,6 +268,46 @@ def on_volunteer_task_saved(sender, instance, created, **kwargs):
                 target_id=instance.pk,
                 target_type='volunteer_task',
             )
+        if not status_changed:
+            return
+
+        if instance.task_status in ('assigned', 'picked', 'in_transit', 'delivered'):
+            if instance.task_status == 'assigned':
+                title = 'Volunteer assigned'
+                body = f'Your donation for "{_volunteer_task_title(instance)}" has a volunteer assigned.'
+                notification_type = 'donation_assigned'
+            elif instance.task_status == 'picked':
+                title = 'Donation picked up'
+                body = f'Volunteer picked up "{_volunteer_task_title(instance)}".'
+                notification_type = 'donation_picked_up'
+            elif instance.task_status == 'in_transit':
+                title = 'Donation in transit'
+                body = f'Volunteer is on the way with "{_volunteer_task_title(instance)}".'
+                notification_type = 'donation_in_transit'
+            else:
+                title = 'Donation delivered'
+                body = f'Volunteer delivered "{_volunteer_task_title(instance)}".'
+                notification_type = 'donation_delivered'
+
+            if donor:
+                notify(
+                    donor,
+                    notification_type,
+                    title,
+                    body,
+                    target_id=instance.pk,
+                    target_type='volunteer_task',
+                )
+            if ngo:
+                notify(
+                    ngo,
+                    notification_type,
+                    title,
+                    body,
+                    target_id=instance.pk,
+                    target_type='volunteer_task',
+                )
+
         if instance.task_status == 'delivered':
             if instance.donation_request_id:
                 notify(
@@ -193,9 +318,9 @@ def on_volunteer_task_saved(sender, instance, created, **kwargs):
                     target_id=instance.donation_request_id,
                     target_type='donation_request',
                 )
-            elif instance.donation_id:
+            elif instance.donation_id and donor:
                 notify(
-                    instance.donation.donor,
+                    donor,
                     'request_completed',
                     'Delivery completed',
                     'Your standalone donation was delivered by a volunteer.',

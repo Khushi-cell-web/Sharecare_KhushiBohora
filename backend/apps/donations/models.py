@@ -187,6 +187,7 @@ class Donation(models.Model):
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
         ('assigned', 'Assigned'),
+        ('picked_up', 'Picked Up'),
         ('in_transit', 'In Transit'),
         ('completed', 'Completed'),
         ('expired', 'Expired'),
@@ -238,6 +239,14 @@ class Donation(models.Model):
         help_text='Last datetime this donation should be considered valid for matching/listing.',
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    accepted_by_ngo = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='accepted_donations',
+        help_text='NGO/Hospital that accepted this donation.',
+    )
     assigned_volunteer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -282,30 +291,46 @@ class Donation(models.Model):
         now = timezone.now()
         return cls.objects.filter(
             category='food',
-            status__in=('pending', 'confirmed', 'assigned', 'in_transit'),
+            status__in=('pending', 'confirmed', 'assigned', 'picked_up', 'in_transit'),
         ).filter(
             models.Q(valid_until__lte=now)
             | (models.Q(valid_until__isnull=True) & models.Q(expiry_date__lte=now))
         ).update(status='expired', updated_at=now)
 
     def save(self, *args, **kwargs):
-        new_completion = False
-        if self.status == 'completed' and not self.points_awarded and self.assigned_volunteer:
-            new_completion = True
-            
+        new_completion = self.status == 'completed' and not self.points_awarded
+
         super().save(*args, **kwargs)
-        
+
         if new_completion:
-            # Re-fetch the volunteer to avoid stale instance issues
             from apps.users.models import User
+
+            # Reward donor for each completed donation.
+            User.objects.filter(pk=self.donor_id).update(
+                points=models.F('points') + 15,
+            )
             try:
-                volunteer = User.objects.get(pk=self.assigned_volunteer_id)
-                volunteer.points += 10
-                volunteer.save(update_fields=['points'])
-                self.points_awarded = True
-                self.save(update_fields=['points_awarded'])
-            except User.DoesNotExist:
+                from apps.notifications.models import Notification
+
+                Notification.objects.create(
+                    user=self.donor,
+                    notification_type='system',
+                    title='Points earned',
+                    message='+15 points earned for your completed donation.',
+                    target_id=self.id,
+                    target_type='donation',
+                )
+            except Exception:
                 pass
+
+            # Reward assigned volunteer when involved in fulfillment.
+            if self.assigned_volunteer_id:
+                User.objects.filter(pk=self.assigned_volunteer_id).update(
+                    points=models.F('points') + 10,
+                )
+
+            self.points_awarded = True
+            super().save(update_fields=['points_awarded'])
 
 
 class DonationMatch(models.Model):

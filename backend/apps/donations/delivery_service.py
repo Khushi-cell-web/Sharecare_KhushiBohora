@@ -29,13 +29,15 @@ def create_pending_volunteer_task_for_offer(offer):
 
 def create_volunteer_task_for_donation_if_needed(donation):
     """
-    Donation record + material + volunteer_pickup → pending task.
-    Standalone: donation_request null (task links donation only — use donation_request from constraint:
-    we need at least one of donation_request or donation; standalone uses donation FK only).
+    Accepted donation record + material + volunteer_pickup → pending task.
+    This is intentionally only called after NGO acceptance so volunteers never
+    see the donation before the NGO approves it.
     """
     from .models import Donation
 
     if not isinstance(donation, Donation):
+        return None
+    if donation.status not in ('confirmed', 'assigned', 'picked_up', 'in_transit', 'completed'):
         return None
     if donation.donation_type != 'material' or donation.fulfillment_type != 'volunteer_pickup':
         return None
@@ -61,7 +63,14 @@ def create_volunteer_task_for_donation_if_needed(donation):
         )
 
     pickup = (donation.pickup_location or '—')[:255]
-    delivery = (donation.delivery_location or '—')[:255]
+    ngo_label = ''
+    if donation.accepted_by_ngo_id:
+        ngo = donation.accepted_by_ngo
+        ngo_label = (ngo.organization or ngo.get_full_name() or ngo.username or '').strip()
+    delivery_src = donation.delivery_location or ''
+    if donation.donation_request_id is None and 'Pending NGO Match' in delivery_src:
+        delivery_src = ''
+    delivery = (delivery_src or ngo_label or '—')[:255]
     return VolunteerTask.objects.create(
         volunteer=None,
         donation_request=None,

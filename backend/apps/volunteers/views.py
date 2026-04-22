@@ -1,6 +1,6 @@
 """Volunteers app: task accept, list, update status, pending tasks, claim/decline."""
 from django.contrib.auth import get_user_model
-from django.db import transaction
+from django.db import transaction, models
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
@@ -24,6 +24,35 @@ def _rank_for_points(points):
     if points >= 51:
         return 'Active'
     return 'Beginner'
+
+
+def _sync_donation_status_from_task(task, *, save_fields=None):
+    """Mirror volunteer task status back onto the donation record for tracking."""
+    if not task.donation_id:
+        return
+
+    donation = task.donation
+    next_status = {
+        'assigned': 'assigned',
+        'picked': 'picked_up',
+        'in_transit': 'in_transit',
+        'delivered': 'completed',
+    }.get(task.task_status)
+
+    if next_status is None:
+        return
+
+    changed_fields = []
+    if donation.status != next_status:
+        donation.status = next_status
+        changed_fields.append('status')
+    if task.volunteer_id and donation.assigned_volunteer_id != task.volunteer_id:
+        donation.assigned_volunteer = task.volunteer
+        changed_fields.append('assigned_volunteer')
+
+    if changed_fields:
+        changed_fields.append('updated_at')
+        donation.save(update_fields=changed_fields)
 
 
 class VolunteerTaskAcceptView(generics.CreateAPIView):
@@ -81,24 +110,56 @@ class VolunteerTaskDetailView(generics.RetrieveUpdateAPIView):
         # Only award points when status transitions to delivered.
         if previous_status != 'delivered':
             with transaction.atomic():
-                task = (
-                    VolunteerTask.objects.select_for_update()
-                    .select_related('volunteer', 'donation_request', 'donation', 'donation_offer')
-                    .get(pk=instance.pk)
-                )
+                # Keep row locking to prevent duplicate point awards, but avoid
+                # nullable outer joins in FOR UPDATE queries on PostgreSQL.
+                task = VolunteerTask.objects.select_for_update().get(pk=instance.pk)
+
+                _sync_donation_status_from_task(task)
 
                 if task.task_status == 'delivered':
                     if task.donation_id:
-                        task.donation.status = 'completed'
-                        task.donation.assigned_volunteer = task.volunteer
+                        # Award donor points for completed donation in volunteer flow.
+                        User.objects.filter(pk=task.donation.donor_id).update(
+                            points=models.F('points') + 15,
+                        )
+                        try:
+                            from apps.notifications.models import Notification
+
+                            Notification.objects.create(
+                                user=task.donation.donor,
+                                notification_type='system',
+                                title='Points earned',
+                                message='+15 points earned for your completed donation.',
+                                target_id=task.id,
+                                target_type='volunteer_task',
+                            )
+                        except Exception:
+                            pass
+
                         # Prevent duplicate points at Donation model-level for this flow.
                         task.donation.points_awarded = True
-                        task.donation.save(
-                            update_fields=['status', 'assigned_volunteer', 'points_awarded', 'updated_at']
-                        )
+                        task.donation.save(update_fields=['points_awarded', 'updated_at'])
                     elif task.donation_offer_id and task.donation_offer.status != 'completed':
                         task.donation_offer.status = 'completed'
                         task.donation_offer.save(update_fields=['status', 'updated_at'])
+
+                        # Award donor points for completed offer flow.
+                        User.objects.filter(pk=task.donation_offer.donor_id).update(
+                            points=models.F('points') + 15,
+                        )
+                        try:
+                            from apps.notifications.models import Notification
+
+                            Notification.objects.create(
+                                user=task.donation_offer.donor,
+                                notification_type='system',
+                                title='Points earned',
+                                message='+15 points earned for your completed donation.',
+                                target_id=task.id,
+                                target_type='volunteer_task',
+                            )
+                        except Exception:
+                            pass
 
                     if not task.points_awarded and task.volunteer_id:
                         points_earned_now = task.completion_points()

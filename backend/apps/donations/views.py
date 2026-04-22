@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db.models import Count, Sum, Q
 from django.db import models
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -17,10 +18,10 @@ from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from io import BytesIO
 
-from apps.users.permissions import IsNGO, IsVerifiedNGOOrAdmin
+from apps.users.permissions import IsNGO, IsNGOOrAdmin, IsVerifiedNGOOrAdmin
 from apps.payments.models import DonationTransaction
 
-from .delivery_service import create_pending_volunteer_task_for_offer
+from .delivery_service import create_pending_volunteer_task_for_offer, create_volunteer_task_for_donation_if_needed
 from .models import CampaignUpdate, Donation, DonationMatch, DonationOffer, DonationRequest, ImpactUpdate
 
 
@@ -59,7 +60,7 @@ from .serializers import (
 
 
 class DonationRequestListCreateView(generics.ListCreateAPIView):
-    """List donation requests (GET, authenticated). Create request (POST, NGO or Admin)."""
+    """List donation requests (GET, public). Create request (POST, NGO or Admin)."""
     serializer_class = DonationRequestSerializer
 
     def get_queryset(self):
@@ -83,7 +84,7 @@ class DonationRequestListCreateView(generics.ListCreateAPIView):
     def get_permissions(self):
         if self.request.method == 'POST':
             return [IsAuthenticated(), IsVerifiedNGOOrAdmin()]
-        return [IsAuthenticated()]
+        return [AllowAny()]
 
     def perform_create(self, serializer):
         dr = serializer.save(created_by=self.request.user)
@@ -102,7 +103,7 @@ class DonationRequestDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_permissions(self):
         if self.request.method in ('PATCH', 'PUT', 'DELETE'):
             return [IsAuthenticated(), IsNGO()]
-        return [IsAuthenticated()]
+        return [AllowAny()]
 
     def get_queryset(self):
         qs = DonationRequest.objects.select_related('created_by')
@@ -551,7 +552,10 @@ class DonationCreateListView(generics.ListCreateAPIView):
     def get_queryset(self):
         Donation.expire_due_donations()
         return Donation.objects.filter(donor=self.request.user).select_related(
-            'donation_request', 'donor'
+            'donation_request',
+            'donor',
+            'accepted_by_ngo',
+            'assigned_volunteer',
         ).order_by('-created_at')
 
     def get_serializer_context(self):
@@ -561,6 +565,100 @@ class DonationCreateListView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save()
+
+
+class NGOPendingDonationListView(generics.ListAPIView):
+    """NGO dashboard queue: donations waiting for acceptance."""
+
+    permission_classes = [IsAuthenticated, IsNGOOrAdmin]
+    serializer_class = DonationSerializer
+
+    def get_queryset(self):
+        Donation.expire_due_donations()
+        return (
+            Donation.objects.filter(
+                Q(status='pending')
+                & (Q(donation_request__isnull=True) | Q(donation_request__created_by=self.request.user))
+            )
+            .select_related(
+                'donor',
+                'donation_request',
+                'accepted_by_ngo',
+                'assigned_volunteer',
+            )
+            .order_by('-created_at')
+        )
+
+
+class NGOAcceptedDonationListView(generics.ListAPIView):
+    """NGO dashboard queue: donations already accepted by the current NGO."""
+
+    permission_classes = [IsAuthenticated, IsNGOOrAdmin]
+    serializer_class = DonationSerializer
+
+    def get_queryset(self):
+        Donation.expire_due_donations()
+        return (
+            Donation.objects.filter(accepted_by_ngo=self.request.user)
+            .exclude(status='expired')
+            .select_related(
+                'donor',
+                'donation_request',
+                'accepted_by_ngo',
+                'assigned_volunteer',
+            )
+            .order_by('-updated_at', '-created_at')
+        )
+
+
+class DonationAcceptView(generics.GenericAPIView):
+    """NGO accepts a pending donation and queues volunteer pickup if needed."""
+
+    permission_classes = [IsAuthenticated, IsNGOOrAdmin]
+    serializer_class = DonationSerializer
+
+    def post(self, request, pk):
+        donation = get_object_or_404(
+            Donation.objects.select_related(
+                'donor',
+                'donation_request',
+                'accepted_by_ngo',
+                'assigned_volunteer',
+            ),
+            pk=pk,
+        )
+
+        if donation.status != 'pending':
+            return Response(
+                {'detail': 'Donation is no longer pending.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        donation.status = 'confirmed'
+        donation.accepted_by_ngo = request.user
+        donation.save(update_fields=['status', 'accepted_by_ngo', 'updated_at'])
+
+        try:
+            create_volunteer_task_for_donation_if_needed(donation)
+        except Exception:
+            pass
+
+        try:
+            from apps.notifications.signals import notify
+
+            donor_name = request.user.get_full_name() or request.user.username
+            notify(
+                donation.donor,
+                'donation_accepted',
+                'Donation accepted',
+                f'Your donation has been accepted by {donor_name}.',
+                target_id=donation.pk,
+                target_type='donation',
+            )
+        except Exception:
+            pass
+
+        return Response(self.get_serializer(donation).data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

@@ -1,0 +1,128 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="sc-admin-shell">
+  <div class="sc-admin-topbar">
+    <div>
+      <p class="sc-admin-breadcrumb">{% trans "Home / Dashboard" %}</p>
+      <h1 class="sc-admin-title">{% trans "Admin Panel" %}</h1>
+    </div>
+    <div class="sc-admin-hero-actions">
+      <a class="button sc-admin-btn sc-admin-btn-approve" href="{% url 'admin:users_userprofile_changelist' %}?verification_status__exact=pending">
+        {% trans "Verification Portal" %}
+      </a>
+      <a class="button sc-admin-btn sc-admin-btn-reject" href="{% url 'admin:users_user_changelist' %}">
+        {% trans "Users" %}
+      </a>
+    </div>
+  </div>
+
+  <div class="sc-admin-hero">
+    <div>
+      <p class="sc-admin-kicker">{% trans "ShareCare Control Center" %}</p>
+      <h1>{% trans "Dashboard" %}</h1>
+      <p>{% trans "Overview of users, verifications, and records." %}</p>
+    </div>
+    <div class="sc-admin-hero-actions">
+      <a class="button sc-admin-btn sc-admin-btn-approve" href="{% url 'admin:users_userprofile_changelist' %}?verification_status__exact=pending">{% trans "Open Verification" %}</a>
+      <a class="button sc-admin-btn sc-admin-btn-reject" href="{% url 'admin:adminpanel_report_changelist' %}">{% trans "Reports" %}</a>
+    </div>
+  </div>
+
+  <div class="sc-admin-grid">
+    <div class="sc-admin-stat">
+      <p class="sc-admin-stat-label">{% trans "Total Users" %}</p>
+      <p class="sc-admin-stat-value">{{ sc_admin_summary.users_total }}</p>
+      <p class="sc-admin-stat-note">{% trans "All registered accounts" %}</p>
+    </div>
+    <div class="sc-admin-stat">
+      <p class="sc-admin-stat-label">{% trans "Pending Verifications" %}</p>
+      <p class="sc-admin-stat-value">{{ sc_admin_summary.pending_verifications }}</p>
+      <p class="sc-admin-stat-note">{% trans "Needs admin review" %}</p>
+    </div>
+    <div class="sc-admin-stat">
+      <p class="sc-admin-stat-label">{% trans "Donation Requests" %}</p>
+      <p class="sc-admin-stat-value">{{ sc_admin_summary.donation_requests_total }}</p>
+      <p class="sc-admin-stat-note">{% trans "Separated on its own page" %}</p>
+    </div>
+    <div class="sc-admin-stat">
+      <p class="sc-admin-stat-label">{% trans "Support Tickets" %}</p>
+      <p class="sc-admin-stat-value">{{ sc_admin_summary.support_tickets_total }}</p>
+      <p class="sc-admin-stat-note">{% trans "Support records page" %}</p>
+    </div>
+  </div>
+
+  <div class="sc-admin-table">
+    <div class="sc-admin-section sc-admin-section-tight" style="border:0; box-shadow:none;">
+      <div class="sc-admin-section-head">
+        <div>
+          <h2>{% trans "Verification Portal" %}</h2>
+          <p>{% trans "Approve or reject pending organization requests." %}</p>
+        </div>
+        <a class="button sc-admin-btn sc-admin-btn-approve" href="{% url 'admin:users_userprofile_changelist' %}?verification_status__exact=pending">{% trans "Open Portal" %}</a>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>{% trans "Organization" %}</th>
+          <th>{% trans "Role" %}</th>
+          <th>{% trans "Verification ID" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th>{% trans "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for profile in sc_admin_pending_profiles %}
+          <tr>
+            <td>
+              <strong>{{ profile.user.username }}</strong><br>
+              <span style="color: var(--sc-muted); font-size: 0.9rem;">{{ profile.user.email }}</span>
+            </td>
+            <td><span class="sc-admin-pill">{{ profile.user.get_role_display }}</span></td>
+            <td>{{ profile.verification_id|default:"-" }}</td>
+            <td><span class="sc-status-pill sc-status-pending">{{ profile.get_verification_status_display }}</span></td>
+            <td>
+              <div class="sc-admin-actions">
+                <a class="button sc-admin-btn sc-admin-btn-approve" href="{% url 'admin:users_userprofile_approve' profile.pk %}">{% trans "Approve" %}</a>
+                <a class="button sc-admin-btn sc-admin-btn-reject" href="{% url 'admin:users_userprofile_reject' profile.pk %}">{% trans "Reject" %}</a>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">{% trans "No pending verification requests right now." %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sc-admin-grid">
+    {% for shortcut in sc_admin_shortcuts %}
+      <a class="sc-admin-card-link" href="{% url shortcut.url %}{{ shortcut.query }}">
+        <div class="sc-admin-card">
+          <h3 class="sc-admin-card-title">{{ shortcut.title }}</h3>
+          <p class="sc-admin-card-subtitle">{{ shortcut.subtitle }}</p>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="sc-admin-section">
+    <h2>{% trans "All Pages" %}</h2>
+    <p>{% trans "Each dataset stays on its own admin page." %}</p>
+    <div class="sc-admin-mini-links">
+      <a href="{% url 'admin:users_user_changelist' %}">{% trans "Users" %}</a>
+      <a href="{% url 'admin:adminpanel_report_changelist' %}">{% trans "Reports" %}</a>
+      <a href="{% url 'admin:adminpanel_usersuspension_changelist' %}">{% trans "User Suspensions" %}</a>
+      <a href="{% url 'admin:donations_donationrequest_changelist' %}">{% trans "Donation Requests" %}</a>
+      <a href="{% url 'admin:donations_donationoffer_changelist' %}">{% trans "Donation Offers" %}</a>
+      <a href="{% url 'admin:volunteers_volunteertask_changelist' %}">{% trans "Volunteer Tasks" %}</a>
+      <a href="{% url 'admin:notifications_notification_changelist' %}">{% trans "Notifications" %}</a>
+      <a href="{% url 'admin:support_supportticket_changelist' %}">{% trans "Support Tickets" %}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

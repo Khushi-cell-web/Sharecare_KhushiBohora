@@ -4,6 +4,7 @@ import html
 import json
 from decimal import Decimal
 from django.http import HttpResponse
+from django.db import transaction
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -32,6 +33,24 @@ from .serializers import (
     PaymentTransactionSerializer,
 )
 from .services import create_payment_intent, verify_payment_intent
+
+
+def _apply_payment_to_request(donation_request: DonationRequest, amount: Decimal):
+    goal_reached = False
+    with transaction.atomic():
+        donation_request = DonationRequest.objects.select_for_update().get(pk=donation_request.pk)
+        donation_request.raised_amount = (donation_request.raised_amount or Decimal('0')) + amount
+        update_fields = ['raised_amount', 'updated_at']
+        if donation_request.goal_amount and donation_request.goal_amount > 0 and donation_request.raised_amount >= donation_request.goal_amount:
+            goal_reached = True
+            if donation_request.status != 'fulfilled':
+                donation_request.status = 'fulfilled'
+                update_fields.append('status')
+        elif donation_request.status == 'open':
+            donation_request.status = 'closed'
+            update_fields.append('status')
+        donation_request.save(update_fields=update_fields)
+    return donation_request, goal_reached
 
 
 class DonationTransactionListView(generics.ListAPIView):
@@ -150,7 +169,12 @@ def stripe_confirm_payment(request):
     if not pt:
         return Response({'detail': 'Payment record not found.'}, status=status.HTTP_404_NOT_FOUND)
     if pt.status == 'succeeded':
-        return Response({'detail': 'Payment already confirmed.'}, status=status.HTTP_400_BAD_REQUEST)
+        if pt.donation_transaction_id:
+            return Response(
+                DonationTransactionSerializer(pt.donation_transaction).data,
+                status=status.HTTP_200_OK,
+            )
+        return Response({'detail': 'Payment already confirmed.'}, status=status.HTTP_200_OK)
 
     try:
         donation_request = DonationRequest.objects.get(pk=donation_request_id)
@@ -174,12 +198,11 @@ def stripe_confirm_payment(request):
     pt.status = 'succeeded'
     pt.save(update_fields=['donation_transaction', 'status'])
 
-    donation_request.raised_amount += amount
-    donation_request.save(update_fields=['raised_amount', 'updated_at'])
+    donation_request, goal_reached = _apply_payment_to_request(donation_request, amount)
     notify_donation_made(donation_request, request.user, amount)
     _broadcast_donation(donation_request)
 
-    if donation_request.goal_amount and donation_request.raised_amount >= donation_request.goal_amount:
+    if goal_reached:
         notify_campaign_goal_reached(donation_request)
 
     return Response(DonationTransactionSerializer(dt).data, status=status.HTTP_201_CREATED)
@@ -440,11 +463,10 @@ def esewa_callback(request):
     pt.save(update_fields=['donation_transaction', 'status'])
 
     if donation_request:
-        donation_request.raised_amount += amount
-        donation_request.save(update_fields=['raised_amount', 'updated_at'])
+        donation_request, goal_reached = _apply_payment_to_request(donation_request, amount)
         notify_donation_made(donation_request, pt.user, amount)
         _broadcast_donation(donation_request)
-        if donation_request.goal_amount and donation_request.raised_amount >= donation_request.goal_amount:
+        if goal_reached:
             notify_campaign_goal_reached(donation_request)
 
     amt_display = html.escape(str(amount), quote=False)
@@ -643,9 +665,9 @@ def esewa_mobile_confirm(request):
         return Response({'detail': 'Transaction not found or already processed.'}, status=status.HTTP_404_NOT_FOUND)
 
     verify_data = verify_esewa_mobile_transaction(ref_id)
-    esewa_status = verify_data.get('transactionDetails', {}).get('status', '')
+    esewa_status = str(verify_data.get('transactionDetails', {}).get('status', '')).upper()
 
-    if esewa_status != 'COMPLETE':
+    if esewa_status not in ('COMPLETE', 'SUCCESS', 'SUCCEEDED'):
         pt.status = 'failed'
         pt.save(update_fields=['status'])
         return Response({'detail': f'Transaction verification failed. Status: {esewa_status}'}, status=status.HTTP_400_BAD_REQUEST)
@@ -666,12 +688,11 @@ def esewa_mobile_confirm(request):
     pt.save(update_fields=['donation_transaction', 'status'])
 
     if donation_request:
-        donation_request.raised_amount += pt.amount
-        donation_request.save(update_fields=['raised_amount', 'updated_at'])
+        donation_request, goal_reached = _apply_payment_to_request(donation_request, pt.amount)
         notify_donation_made(donation_request, pt.user, pt.amount)
         _broadcast_donation(donation_request)
 
-        if donation_request.goal_amount and donation_request.raised_amount >= donation_request.goal_amount:
+        if goal_reached:
             notify_campaign_goal_reached(donation_request)
 
     return Response(DonationTransactionSerializer(dt).data, status=status.HTTP_200_OK)

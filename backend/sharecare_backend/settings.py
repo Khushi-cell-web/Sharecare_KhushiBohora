@@ -11,7 +11,9 @@ from dotenv import load_dotenv
 
 # Project paths
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
+# Ensure project .env values win over any stale terminal/user env vars.
+# This prevents accidental Postgres selection when backend/.env says sqlite.
+load_dotenv(BASE_DIR / '.env', override=True)
 
 _google_oauth_client_ids_raw = (
     os.getenv('GOOGLE_OAUTH_CLIENT_IDS', '')
@@ -84,7 +86,7 @@ CHANNEL_LAYERS = {
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -100,7 +102,8 @@ TEMPLATES = [
 # To use PostgreSQL, set ENV:
 #   DB_ENGINE=postgres
 #   DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
-if os.getenv('DB_ENGINE', '').lower() == 'postgres':
+db_engine = os.getenv('DB_ENGINE', 'sqlite').strip().lower()
+if db_engine in ('postgres', 'postgresql'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -173,33 +176,42 @@ JAZZMIN_SETTINGS = {
     "site_title": "ShareCare Admin",
     "site_header": "ShareCare",
     "site_brand": "ShareCare",
-    "site_logo": "images/logo.png",  # Update with your actual logo
-    "welcome_sign": "Welcome to the ShareCare Platform",
+    "site_logo": "img/sharecare_admin_logo.svg",
+    "site_logo_classes": "img-fluid",
+    "welcome_sign": "ShareCare Control Center",
     "copyright": "ShareCare Ltd",
     "search_model": ["users.User", "donations.DonationRequest"],
     "show_ui_builder": False,
-    "custom_css": "css/custom_admin.css",
-    "custom_js": "js/custom_admin.js",
+    "custom_css": "css/sharecare_admin_theme.css?v=20260422-1",
+    "custom_js": "js/custom_admin.js?v=20260422-1",
+    "hide_apps": ["auth", "contenttypes", "sessions"],
 }
 
 JAZZMIN_UI_TWEAKS = {
     "navbar": "navbar-dark",
-    "theme": "darkly",
-    "dark_mode_theme": "darkly",
+    "theme": "default",
+    "dark_mode_theme": "default",
     "sidebar": "sidebar-dark-primary",
     "sidebar_nav_child_indent": True,
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme_color": "default",
-    "accent": "primary",
+    "theme_color": "primary",
+    "accent": "accent-pink",
 }
 
 # App user model.
 AUTH_USER_MODEL = 'users.User'
 
 # Email (SMTP)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Default to SMTP so OTP reaches real inboxes even in local debug runs.
+# Set EMAIL_DELIVERY_MODE=console in backend/.env only when you explicitly
+# want OTP/email output printed to terminal.
+email_delivery_mode = os.getenv('EMAIL_DELIVERY_MODE', 'smtp').strip().lower()
+if email_delivery_mode == 'console':
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
