@@ -21,7 +21,7 @@ class ModernDonationCard extends StatelessWidget {
   final bool showDistance;
   final Widget? trailing;
 
-  static const Map<String, Color> _categoryColors = {
+  static final Map<String, Color> _categoryColors = {
     'food': AppTheme.categoryFoodIcon,
     'clothes': AppTheme.categoryClothesIcon,
     'funds': AppTheme.categoryFundsIcon,
@@ -63,6 +63,15 @@ class ModernDonationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? colorScheme.onSurface : AppTheme.navy;
+    final secondaryColor = colorScheme.onSurface.withValues(
+      alpha: isDark ? 0.74 : 0.62,
+    );
+    final iconColor = colorScheme.onSurface.withValues(
+      alpha: isDark ? 0.7 : 0.52,
+    );
     final isUrgent = request.urgency?.toLowerCase() == 'high';
 
     return GestureDetector(
@@ -153,7 +162,7 @@ class ModernDonationCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.navy,
+                      color: titleColor,
                       height: 1.4,
                     ),
                   ),
@@ -165,7 +174,7 @@ class ModernDonationCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: secondaryColor,
                         height: 1.4,
                       ),
                     ),
@@ -174,7 +183,10 @@ class ModernDonationCard extends StatelessWidget {
               ),
             ),
             // Divider
-            Container(height: 1, color: Colors.grey.withValues(alpha: 0.1)),
+            Container(
+              height: 1,
+              color: colorScheme.outline.withValues(alpha: isDark ? 0.4 : 0.2),
+            ),
             // Footer with details
             Padding(
               padding: const EdgeInsets.all(16),
@@ -190,14 +202,14 @@ class ModernDonationCard extends StatelessWidget {
                             Icon(
                               Icons.inventory_2_outlined,
                               size: 16,
-                              color: Colors.grey.shade500,
+                              color: iconColor,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               'Qty: ${request.quantityNeeded}',
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
-                                color: Colors.grey.shade600,
+                                color: secondaryColor,
                               ),
                             ),
                           ],
@@ -209,14 +221,14 @@ class ModernDonationCard extends StatelessWidget {
                               Icon(
                                 Icons.location_on_outlined,
                                 size: 16,
-                                color: Colors.grey.shade500,
+                                color: iconColor,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 _distanceText,
                                 style: GoogleFonts.poppins(
                                   fontSize: 12,
-                                  color: Colors.grey.shade600,
+                                  color: secondaryColor,
                                 ),
                               ),
                             ],
@@ -248,7 +260,7 @@ class CompactDonationCard extends StatelessWidget {
   final DonationRequest request;
   final VoidCallback? onTap;
 
-  static const Map<String, Color> _categoryColors = {
+  static final Map<String, Color> _categoryColors = {
     'food': AppTheme.categoryFoodIcon,
     'clothes': AppTheme.categoryClothesIcon,
     'funds': AppTheme.categoryFundsIcon,
@@ -262,6 +274,12 @@ class CompactDonationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? colorScheme.onSurface : AppTheme.navy;
+    final descriptionColor = colorScheme.onSurface.withValues(
+      alpha: isDark ? 0.72 : 0.58,
+    );
     final isUrgent = request.urgency?.toLowerCase() == 'high';
 
     return GestureDetector(
@@ -325,7 +343,7 @@ class CompactDonationCard extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: AppTheme.navy,
+                  color: titleColor,
                   height: 1.3,
                 ),
               ),
@@ -338,7 +356,7 @@ class CompactDonationCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 11,
-                    color: Colors.grey.shade500,
+                    color: descriptionColor,
                     height: 1.3,
                   ),
                 ),

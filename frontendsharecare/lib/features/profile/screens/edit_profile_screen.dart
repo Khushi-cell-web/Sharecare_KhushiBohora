@@ -70,7 +70,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await auth.loadUser();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Profile updated'),
             backgroundColor: AppTheme.primaryGreen,
           ),
@@ -118,7 +118,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppTheme.primaryTeal, width: 1.5),
+        borderSide: BorderSide(color: AppTheme.primaryTeal, width: 1.5),
       ),
     );
   }

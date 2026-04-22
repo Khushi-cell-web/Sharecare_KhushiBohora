@@ -23,7 +23,7 @@ class DonateTabScreen extends StatelessWidget {
                 top: MediaQuery.of(context).padding.top + 32,
                 bottom: 32,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),

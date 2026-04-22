@@ -45,7 +45,7 @@ class _NgoVerificationScreenState extends State<NgoVerificationScreen> {
       await auth.loadUser();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
               'Verification ID submitted. An admin will verify your organization.',
             ),
@@ -117,7 +117,7 @@ class _NgoVerificationScreenState extends State<NgoVerificationScreen> {
                 right: 20,
                 bottom: 40,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
@@ -380,7 +380,7 @@ class _NgoVerificationScreenState extends State<NgoVerificationScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
+                              borderSide: BorderSide(
                                 color: AppTheme.primaryTeal,
                                 width: 1.5,
                               ),

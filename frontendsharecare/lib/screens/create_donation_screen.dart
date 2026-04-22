@@ -49,17 +49,12 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
   static const List<Map<String, dynamic>> _categories = [
     {'value': 'food', 'label': 'Food', 'icon': Icons.restaurant_rounded},
     {'value': 'clothes', 'label': 'Clothes', 'icon': Icons.checkroom_rounded},
-    {
-      'value': 'medicine',
-      'label': 'Medicine',
-      'icon': Icons.medication_rounded,
-    },
     {'value': 'blood', 'label': 'Blood', 'icon': Icons.water_drop_rounded},
     {'value': 'funds', 'label': 'Money', 'icon': Icons.attach_money_rounded},
     {'value': 'other', 'label': 'Other', 'icon': Icons.more_horiz_rounded},
   ];
 
-  static const List<Map<String, dynamic>> _urgencyLevels = [
+  static final List<Map<String, dynamic>> _urgencyLevels = [
     {'value': 'low', 'label': 'Low', 'color': AppTheme.statusSuccess},
     {'value': 'medium', 'label': 'Medium', 'color': AppTheme.statusWarning},
     {'value': 'high', 'label': 'High', 'color': AppTheme.chipUrgent},
@@ -124,9 +119,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
               value: 1.0,
               minHeight: 6,
               backgroundColor: Colors.grey.shade200,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                AppTheme.primaryTeal,
-              ),
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
             ),
           ),
         ],
@@ -248,7 +241,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
           SliverToBoxAdapter(
             child: Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(24),
@@ -793,10 +786,19 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                               hintText: 'Tap to pick on map or search address',
                               initialLat: _pickupLat,
                               initialLng: _pickupLng,
-                              onLocationPicked: (lat, lng, _) => setState(() {
-                                _pickupLat = lat;
-                                _pickupLng = lng;
-                              }),
+                              onLocationPicked:
+                                  (lat, lng, address) => setState(() {
+                                    _pickupLat = lat;
+                                    _pickupLng = lng;
+                                    _locationController.value =
+                                        TextEditingValue(
+                                          text: address,
+                                          selection:
+                                              TextSelection.collapsed(
+                                                offset: address.length,
+                                              ),
+                                        );
+                                  }),
                               validator: (v) => (v == null || v.trim().isEmpty)
                                   ? 'Required'
                                   : null,
@@ -878,9 +880,7 @@ class _CreateDonationScreenState extends State<CreateDonationScreen> {
                               ),
                               style: OutlinedButton.styleFrom(
                                 alignment: Alignment.centerLeft,
-                                side: const BorderSide(
-                                  color: AppTheme.primaryTeal,
-                                ),
+                                side: BorderSide(color: AppTheme.primaryTeal),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: AppTheme.spaceMd,
                                   vertical: 14,

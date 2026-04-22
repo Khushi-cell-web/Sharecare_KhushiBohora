@@ -140,7 +140,7 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
                 top: MediaQuery.of(context).padding.top + 16,
                 bottom: 32,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
@@ -238,7 +238,7 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
 
           // ── Body content ──
           if (_loading)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
                 child: CircularProgressIndicator(color: AppTheme.primaryTeal),

@@ -7,6 +7,7 @@ import 'api_service.dart';
 import '../../shared/models/user_model.dart';
 import '../../shared/models/donation_request.dart';
 import '../../shared/models/donation_offer.dart';
+import '../../shared/models/donation_record.dart';
 import '../../shared/models/donation_match.dart';
 import '../../shared/models/donation_transaction.dart';
 import '../../shared/models/volunteer_task.dart';
@@ -501,6 +502,63 @@ class ShareCareApiService {
     if (r.statusCode != 200) throw ShareCareApiException(r.statusCode, r.body);
     final list = jsonDecode(r.body) as List<dynamic>;
     return list.map((e) => e as Map<String, dynamic>).toList();
+  }
+
+  Future<List<DonationRecord>> getMyDonationRecords(
+    Map<String, String> authHeaders,
+  ) async {
+    final r = await _api.get(
+      '${ApiConstants.donationsPrefix}/donations/',
+      headers: _headers(authHeaders),
+    );
+    if (r.statusCode != 200) throw ShareCareApiException(r.statusCode, r.body);
+    final list = jsonDecode(r.body) as List<dynamic>;
+    return list
+        .map((e) => DonationRecord.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<DonationRecord>> getNgoPendingDonations(
+    Map<String, String> authHeaders,
+  ) async {
+    final r = await _api.get(
+      '${ApiConstants.donationsPrefix}/donations/pending/',
+      headers: _headers(authHeaders),
+    );
+    if (r.statusCode != 200) throw ShareCareApiException(r.statusCode, r.body);
+    final list = jsonDecode(r.body) as List<dynamic>;
+    return list
+        .map((e) => DonationRecord.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<DonationRecord>> getNgoAcceptedDonations(
+    Map<String, String> authHeaders,
+  ) async {
+    final r = await _api.get(
+      '${ApiConstants.donationsPrefix}/donations/accepted/',
+      headers: _headers(authHeaders),
+    );
+    if (r.statusCode != 200) throw ShareCareApiException(r.statusCode, r.body);
+    final list = jsonDecode(r.body) as List<dynamic>;
+    return list
+        .map((e) => DonationRecord.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<DonationRecord> acceptDonation(
+    Map<String, String> authHeaders,
+    int donationId,
+  ) async {
+    final r = await _api.post(
+      '${ApiConstants.donationsPrefix}/donations/$donationId/accept/',
+      headers: _headers(authHeaders),
+      body: const {},
+    );
+    if (r.statusCode >= 200 && r.statusCode < 300) {
+      return DonationRecord.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
+    }
+    throw ShareCareApiException(r.statusCode, r.body);
   }
 
   // ----- Volunteers (api/volunteers/) -----

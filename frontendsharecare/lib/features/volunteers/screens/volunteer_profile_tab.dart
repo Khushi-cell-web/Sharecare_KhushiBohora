@@ -71,7 +71,7 @@ class _VolunteerProfileTabState extends State<VolunteerProfileTab> {
                 top: MediaQuery.of(context).padding.top + 16,
                 bottom: 28,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -174,7 +174,7 @@ class _VolunteerProfileTabState extends State<VolunteerProfileTab> {
                       label: const Text('Edit profile'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.primaryGreen,
-                        side: const BorderSide(color: AppTheme.primaryGreen),
+                        side: BorderSide(color: AppTheme.primaryGreen),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

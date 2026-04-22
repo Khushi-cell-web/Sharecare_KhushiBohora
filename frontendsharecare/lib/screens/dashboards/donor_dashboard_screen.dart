@@ -90,7 +90,7 @@ class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
           top: MediaQuery.of(context).padding.top + 16,
           bottom: 48,
         ),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppTheme.primaryGreen,
           borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(32),
@@ -182,6 +182,15 @@ class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
               ),
             ],
           ),
+            const SizedBox(height: 12),
+            _ActionButtonOutlined(
+              icon: Icons.local_shipping_outlined,
+              label: 'Track My Donations',
+              color: AppTheme.primaryGreen,
+              onTap: () => Navigator.of(
+                context,
+              ).pushNamed(AppRoutes.myDonationRecords),
+            ),
         ],
       ),
     );
@@ -218,7 +227,7 @@ class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
         ),
         const SizedBox(height: 14),
         if (_loadingRec)
-          const Center(
+          Center(
             child: Padding(
               padding: EdgeInsets.all(24),
               child: CircularProgressIndicator(color: AppTheme.primaryTeal),
@@ -240,7 +249,7 @@ class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
                     color: AppTheme.primaryTeal.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.volunteer_activism,
                     size: 36,
                     color: AppTheme.primaryTeal,

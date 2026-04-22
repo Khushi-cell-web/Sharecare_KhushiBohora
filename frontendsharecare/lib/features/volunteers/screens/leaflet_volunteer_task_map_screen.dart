@@ -130,18 +130,18 @@ class _LeafletVolunteerTaskMapScreenState
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.primaryPinkDark,
         actions: [
           TextButton.icon(
             onPressed: () => _openInGoogleMaps(),
-            icon: const Icon(
+            icon: Icon(
               Icons.directions_rounded,
               size: 20,
-              color: Colors.white,
+              color: AppTheme.primaryPinkDark,
             ),
-            label: const Text(
+            label: Text(
               'Directions',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: AppTheme.primaryPinkDark),
             ),
           ),
         ],

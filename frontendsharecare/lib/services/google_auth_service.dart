@@ -26,29 +26,31 @@ class GoogleAuthService {
   Future<GoogleSignInResult> signInWithGoogle() async {
     try {
       final serverClientId = AppConfig.googleServerClientId;
-      if (serverClientId == null || serverClientId.isEmpty) {
-        return GoogleSignInResult(
-          errorMessage:
-              'Google Sign-In is not configured. Set GOOGLE_SERVER_CLIENT_ID in assets/.env.',
-        );
-      }
-
       if (!_initialized) {
-        await GoogleSignIn.instance.initialize(serverClientId: serverClientId);
+        if (serverClientId != null && serverClientId.isNotEmpty) {
+          await GoogleSignIn.instance.initialize(
+            clientId: serverClientId,
+            serverClientId: serverClientId,
+          );
+        } else {
+          // Allow fallback to platform defaults (e.g. google-services files).
+          await GoogleSignIn.instance.initialize();
+        }
         _initialized = true;
       }
 
-      // Force account picker every time.
-      await GoogleSignIn.instance.signOut();
-
       final GoogleSignInAccount account = await GoogleSignIn.instance
-          .authenticate(scopeHint: ['email']);
+          .authenticate();
 
       final idToken = account.authentication.idToken;
       if (idToken == null || idToken.isEmpty) {
+        final missingServerClientId =
+            serverClientId == null || serverClientId.isEmpty;
         return GoogleSignInResult(
           account: account,
-          errorMessage: 'Google Sign-In did not return an ID token.',
+          errorMessage: missingServerClientId
+              ? 'Google Sign-In did not return an ID token. Set GOOGLE_SERVER_CLIENT_ID in assets/.env.'
+              : 'Google Sign-In did not return an ID token. Verify your OAuth client setup.',
         );
       }
 
@@ -58,7 +60,7 @@ class GoogleAuthService {
       return GoogleSignInResult(
         cancelled: cancelled,
         errorMessage: cancelled
-            ? 'Google sign-in was cancelled.'
+            ? 'Google sign-in was cancelled or interrupted. Please try again.'
             : 'Google sign-in failed: ${e.description ?? e.code.name}',
       );
     } catch (e) {
@@ -69,7 +71,7 @@ class GoogleAuthService {
   Future<void> signOut() async {
     try {
       if (_initialized) {
-        await GoogleSignIn.instance.signOut();
+        await GoogleSignIn.instance.disconnect();
       }
     } catch (_) {}
   }

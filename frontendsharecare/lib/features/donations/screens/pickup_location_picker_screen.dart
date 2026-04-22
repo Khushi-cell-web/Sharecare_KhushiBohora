@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import 'dart:convert';
 
 import '../../../core/theme/app_theme.dart';
 
@@ -40,10 +42,17 @@ class _PickupLocationPickerScreenState
     extends State<PickupLocationPickerScreen> {
   static const double _defaultLat = 27.7172;
   static const double _defaultLng = 85.3240;
+  static const String _nominatimBaseUrl = 'https://nominatim.openstreetmap.org';
+  static const Map<String, String> _nominatimHeaders = {
+    'User-Agent': 'ShareCare/1.0 (frontendsharecare)',
+    'Accept': 'application/json',
+    'Accept-Language': 'en',
+  };
 
   final MapController _mapController = MapController();
   final TextEditingController _addressController = TextEditingController();
   LatLng? _point;
+  bool _loadingAddress = false;
 
   @override
   void initState() {
@@ -51,6 +60,7 @@ class _PickupLocationPickerScreenState
     final lat = widget.initialLatitude ?? _defaultLat;
     final lng = widget.initialLongitude ?? _defaultLng;
     _point = LatLng(lat, lng);
+    _reverseGeocode(lat, lng);
   }
 
   @override
@@ -62,14 +72,52 @@ class _PickupLocationPickerScreenState
   void _confirm() {
     final p = _point;
     if (p == null) return;
+    final resolvedAddress = _addressController.text.trim().isEmpty
+        ? '${p.latitude.toStringAsFixed(5)}, ${p.longitude.toStringAsFixed(5)}'
+        : _addressController.text.trim();
     Navigator.maybePop(
       context,
       PickupLocationPickerResult(
         latitude: p.latitude,
         longitude: p.longitude,
-        address: _addressController.text.trim(),
+        address: resolvedAddress,
       ),
     );
+  }
+
+  Future<void> _reverseGeocode(double lat, double lng) async {
+    if (!mounted) return;
+    setState(() => _loadingAddress = true);
+    try {
+      final uri = Uri.parse(
+        '$_nominatimBaseUrl/reverse?format=jsonv2&lat=$lat&lon=$lng&zoom=18&addressdetails=1',
+      );
+      final response = await http
+          .get(uri, headers: _nominatimHeaders)
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) {
+        throw Exception('Reverse geocode failed (${response.statusCode})');
+      }
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final displayName = (data['display_name'] as String?)?.trim() ?? '';
+      if (!mounted) return;
+      final text = displayName.isEmpty
+          ? '${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}'
+          : displayName;
+      _addressController.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      final fallback = '${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}';
+      _addressController.value = TextEditingValue(
+        text: fallback,
+        selection: TextSelection.collapsed(offset: fallback.length),
+      );
+    } finally {
+      if (mounted) setState(() => _loadingAddress = false);
+    }
   }
 
   @override
@@ -91,6 +139,7 @@ class _PickupLocationPickerScreenState
                 initialZoom: 14,
                 onTap: (tapPosition, latlng) {
                   setState(() => _point = latlng);
+                  _reverseGeocode(latlng.latitude, latlng.longitude);
                 },
               ),
               children: [
@@ -146,7 +195,21 @@ class _PickupLocationPickerScreenState
                   TextField(
                     controller: _addressController,
                     decoration: InputDecoration(
-                      labelText: 'Address / landmark (optional)',
+                      labelText: 'Address / landmark',
+                      helperText:
+                          'Auto-filled from map pin; you can edit if needed',
+                      suffixIcon: _loadingAddress
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          : null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

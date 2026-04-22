@@ -24,7 +24,7 @@ class AboutScreen extends StatelessWidget {
                     left: 20,
                     right: 20,
                   ),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppTheme.accentTeal,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(32),

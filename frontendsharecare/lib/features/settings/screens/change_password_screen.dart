@@ -53,7 +53,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Password updated'),
             backgroundColor: AppTheme.primaryTeal,
           ),
@@ -100,7 +100,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget _buildGradientHeader() {
     return Container(
       padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppTheme.primaryGreen,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(32),
@@ -314,10 +314,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: AppTheme.primaryTeal,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: AppTheme.primaryTeal, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),

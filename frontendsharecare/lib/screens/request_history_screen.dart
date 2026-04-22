@@ -107,7 +107,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
         ],
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AppTheme.primaryTeal),
             )
           : _error != null

@@ -112,10 +112,10 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> {
       appBar: AppBar(
         title: const Text('Matchmaking'),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.primaryPinkDark,
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AppTheme.primaryTeal),
             )
           : _error != null

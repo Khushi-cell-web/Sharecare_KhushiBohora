@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -172,13 +172,13 @@ class _LifeDonationsScreenState extends State<LifeDonationsScreen> {
           'Life Donations',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
-            color: AppTheme.primaryPinkDark,
+            color: Colors.white,
           ),
         ),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: AppTheme.primaryPinkDark,
+        foregroundColor: Colors.white,
         elevation: 0,
-        iconTheme: IconThemeData(color: AppTheme.primaryPinkDark),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           if (auth.isAuthenticated)
             IconButton(
@@ -364,7 +364,7 @@ class _BloodSection extends StatelessWidget {
                   : null,
               style: FilledButton.styleFrom(
                 backgroundColor: AppTheme.primaryGreen,
-                foregroundColor: AppTheme.primaryPinkDark,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -417,12 +417,12 @@ class _OrganSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryPinkLight,
+                    color: Colors.pink.shade50,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.favorite_rounded,
-                    color: AppTheme.primaryPinkDark,
+                    color: Colors.pink.shade700,
                     size: 28,
                   ),
                 ),
@@ -456,7 +456,7 @@ class _OrganSection extends StatelessWidget {
                 onPressed: onPledge,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.primaryGreen,
-                  foregroundColor: AppTheme.primaryPinkDark,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

@@ -23,6 +23,23 @@ class _VolunteerAssignedTabState extends State<VolunteerAssignedTab> {
   bool _loading = true;
   String? _error;
 
+  Future<T> _runWithAuthRetry<T>(
+    Future<T> Function(Map<String, String> headers) operation,
+  ) async {
+    final auth = context.read<AuthProvider>();
+    try {
+      return await operation(auth.authHeaders);
+    } on ShareCareApiException catch (e) {
+      if (e.statusCode == 401) {
+        final refreshed = await auth.tryRefreshToken();
+        if (refreshed) {
+          return await operation(auth.authHeaders);
+        }
+      }
+      rethrow;
+    }
+  }
+
   List<VolunteerTask> get _activeTasks =>
       _tasks.where((t) => t.taskStatus != 'delivered').toList();
 
@@ -51,6 +68,13 @@ class _VolunteerAssignedTabState extends State<VolunteerAssignedTab> {
         });
       }
     } on ShareCareApiException catch (e) {
+      if (e.statusCode == 401) {
+        final refreshed = await auth.tryRefreshToken();
+        if (refreshed) {
+          _load();
+          return;
+        }
+      }
       if (mounted) {
         setState(() {
           _error = NetworkErrorHelper.toUserMessage(e);
@@ -71,10 +95,8 @@ class _VolunteerAssignedTabState extends State<VolunteerAssignedTab> {
     final auth = context.read<AuthProvider>();
     if (!auth.isAuthenticated) return;
     try {
-      final updated = await _api.updateTask(
-        auth.authHeaders,
-        task.id,
-        taskStatus: newStatus,
+      final updated = await _runWithAuthRetry(
+        (headers) => _api.updateTask(headers, task.id, taskStatus: newStatus),
       );
 
       if (newStatus == 'delivered') {
@@ -100,6 +122,15 @@ class _VolunteerAssignedTabState extends State<VolunteerAssignedTab> {
         _load();
       }
     } on ShareCareApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(NetworkErrorHelper.toUserMessage(e)),
+            backgroundColor: AppTheme.statusError,
+          ),
+        );
+      }
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -139,7 +170,7 @@ class _VolunteerAssignedTabState extends State<VolunteerAssignedTab> {
       body: RefreshIndicator(
         onRefresh: _load,
         child: _loading
-            ? const Center(
+            ? Center(
                 child: CircularProgressIndicator(color: AppTheme.primaryTeal),
               )
             : _error != null

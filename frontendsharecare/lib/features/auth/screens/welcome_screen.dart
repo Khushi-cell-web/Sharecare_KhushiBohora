@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_routes.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -17,11 +18,11 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF2E7D5B), Color(0xFFA5D6A7)],
+            colors: [AppTheme.primaryPinkDark, AppTheme.primaryPinkColor],
           ),
         ),
         child: SafeArea(
@@ -51,7 +52,7 @@ class WelcomeScreen extends StatelessWidget {
                 width: 160,
                 height: 160,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFC8E6C9), // Light green
+                  color: AppTheme.primaryPinkSoft,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -111,12 +112,12 @@ class WelcomeScreen extends StatelessWidget {
                                 fontSize: 16,
                                 height: 1.5,
                               ),
-                              children: const [
+                              children: [
                                 TextSpan(text: 'A platform that connects '),
                                 TextSpan(
                                   text: 'donors',
                                   style: TextStyle(
-                                    color: Color(0xFF2E7D5B),
+                                    color: AppTheme.primaryPinkDark,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -124,7 +125,7 @@ class WelcomeScreen extends StatelessWidget {
                                 TextSpan(
                                   text: 'NGOs',
                                   style: TextStyle(
-                                    color: Color(0xFF2E7D5B),
+                                    color: AppTheme.primaryPinkDark,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -132,7 +133,7 @@ class WelcomeScreen extends StatelessWidget {
                                 TextSpan(
                                   text: 'volunteers',
                                   style: TextStyle(
-                                    color: Color(0xFF2E7D5B),
+                                    color: AppTheme.primaryPinkDark,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -169,7 +170,7 @@ class WelcomeScreen extends StatelessWidget {
       width: isActive ? 24 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF2E7D5B) : Colors.grey.shade400,
+        color: isActive ? AppTheme.primaryPinkDark : Colors.grey.shade400,
         borderRadius: BorderRadius.circular(4),
       ),
     );

@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'app_theme.dart';
+
 class SoftTheme {
   // Color Palette
-  static const Color background = Color(0xFFF5F7FA);
-  static const Color primaryTeal = Color(0xFF2A9D8F);
+  static Color get background => AppTheme.backgroundLight;
+  static Color get primaryPinkColor => AppTheme.primaryPinkColor;
+  static Color get primaryPinkDark => AppTheme.primaryPinkDark;
+  static Color get primaryPinkSoft => AppTheme.primaryPinkSoft;
+  static Color get primaryTeal => AppTheme.primaryTeal;
   static const Color accentOrange = Color(0xFFE76F51);
-  static const Color textDark = Color(0xFF2D3142);
-  static const Color textLight = Color(0xFF9094A6);
-  static const Color surfaceWhite = Color(0xFFFFFFFF);
-  static const Color statusSuccess = Color(0xFF4CAF50);
+  static Color get textDark => AppTheme.appBarOnSurfaceLight;
+  static Color get textLight => AppTheme.textSecondary;
+  static Color get surfaceWhite => AppTheme.surfaceWhite;
+  static Color get statusSuccess => AppTheme.statusSuccess;
   static const Color statusWarning = Color(0xFFF4A261);
   static const Color statusError = Color(0xFFE63946);
 
@@ -18,7 +23,7 @@ class SoftTheme {
       scaffoldBackgroundColor: background,
       primaryColor: primaryTeal,
       fontFamily: GoogleFonts.poppins().fontFamily,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: background,
         elevation: 0,
         iconTheme: IconThemeData(color: textDark),
@@ -58,7 +63,7 @@ class SoftTheme {
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: surfaceWhite,
         selectedItemColor: primaryTeal,
-        unselectedItemColor: textLight.withOpacity(0.5),
+        unselectedItemColor: textLight.withValues(alpha: 0.5),
         elevation: 20,
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: true,
@@ -235,14 +240,14 @@ class _GradientButtonState extends State<GradientButton> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               colors: [SoftTheme.primaryTeal, SoftTheme.accentOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: SoftTheme.accentOrange.withOpacity(0.3),
+                color: SoftTheme.accentOrange.withValues(alpha: 0.3),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -312,7 +317,7 @@ class ProgressRing extends StatelessWidget {
               Center(
                 child: Text(
                   '${(progress * 100).toInt()}%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: SoftTheme.textDark,
                   ),

@@ -22,11 +22,11 @@ class DonationHistoryScreen extends StatefulWidget {
 }
 
 class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
-  static const Color _pinkPrimary = Color(0xFFFFC1CC);
-  static const Color _pinkLight = Color(0xFFFFEEF3);
-  static const Color _pinkSoft = Color(0xFFFFD9E2);
-  static const Color _roseText = Color(0xFF8A4E5E);
-  static const Color _roseMutedText = Color(0xFFB07A88);
+  Color get _pinkPrimary => AppTheme.primaryPinkColor;
+  Color get _pinkLight => AppTheme.primaryPinkLight;
+  Color get _pinkSoft => AppTheme.primaryPinkSoft;
+  Color get _roseText => AppTheme.primaryPinkDark;
+  Color get _roseMutedText => AppTheme.primaryPinkMuted;
 
   String _filter = 'all';
   List<DonationTransaction> _history = [];
@@ -64,7 +64,7 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
       await saveAndOpenReceipt(bytes, 'sharecare_receipt_$transactionId.pdf');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Receipt opened'),
             backgroundColor: AppTheme.primaryTeal,
           ),
@@ -192,89 +192,115 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: RefreshIndicator(
-        onRefresh: _loadHistory,
-        color: _roseText,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          slivers: [
-            SliverToBoxAdapter(child: _buildGradientHeader()),
-            if (_loading)
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: CircularProgressIndicator(color: _roseText),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final horizontalPadding = width >= 1100
+              ? 32.0
+              : width >= 760
+              ? 24.0
+              : 16.0;
+          final contentMaxWidth = width >= 1200 ? 980.0 : 860.0;
+
+          return RefreshIndicator(
+            onRefresh: _loadHistory,
+            color: _roseText,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _buildGradientHeader(
+                    contentMaxWidth: contentMaxWidth,
+                    horizontalPadding: horizontalPadding,
+                  ),
                 ),
-              )
-            else if (_error != null)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: _pinkPrimary.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.error_outline_rounded,
-                            size: 48,
-                            color: Colors.red,
+                if (_loading)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: CircularProgressIndicator(color: _roseText),
+                    ),
+                  )
+                else if (_error != null)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: _pinkPrimary.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.error_outline_rounded,
+                                size: 48,
+                                color: Colors.red,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _error!,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                color: Colors.red,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            FilledButton.icon(
+                              onPressed: _loadHistory,
+                              icon: const Icon(Icons.refresh_rounded),
+                              label: const Text('Retry'),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: _roseText,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  SliverToBoxAdapter(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: contentMaxWidth),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: _buildContent(
+                            list,
+                            completed: _impact.completed,
+                            pending: _impact.pending,
+                            total: _impact.total,
+                            horizontalPadding: horizontalPadding,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _error!,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                            color: Colors.red,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        FilledButton.icon(
-                          onPressed: _loadHistory,
-                          icon: const Icon(Icons.refresh_rounded),
-                          label: const Text('Retry'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: _roseText,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              )
-            else
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: _buildContent(
-                    list,
-                    completed: _impact.completed,
-                    pending: _impact.pending,
-                    total: _impact.total,
-                  ),
-                ),
-              ),
-          ],
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildGradientHeader() {
+  Widget _buildGradientHeader({
+    required double contentMaxWidth,
+    required double horizontalPadding,
+  }) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [_pinkLight, _pinkPrimary, _pinkSoft],
@@ -286,113 +312,123 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
       ),
       child: SafeArea(
         bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 46),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: contentMaxWidth),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                18,
+                horizontalPadding,
+                46,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.maybePop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.75),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: _pinkPrimary.withValues(alpha: 0.35),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.maybePop(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.75),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _pinkPrimary.withValues(alpha: 0.35),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back_rounded,
-                        color: _roseText,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      'Donation History',
-                      style: GoogleFonts.poppins(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: _roseText,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: _loading ? null : _loadHistory,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.75),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: _pinkPrimary.withValues(alpha: 0.35),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                          child: Icon(
+                            Icons.arrow_back_rounded,
+                            color: _roseText,
+                            size: 22,
                           ),
-                        ],
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.refresh_rounded,
-                        color: _roseText,
-                        size: 22,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          'Donation History',
+                          style: GoogleFonts.poppins(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: _roseText,
+                          ),
+                        ),
                       ),
+                      GestureDetector(
+                        onTap: _loading ? null : _loadHistory,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.75),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _pinkPrimary.withValues(alpha: 0.35),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.refresh_rounded,
+                            color: _roseText,
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: _pinkPrimary.withValues(alpha: 0.55),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _pinkPrimary.withValues(alpha: 0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Your giving journey',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: _roseText,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Track completed and pending donations in one place.',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: _roseMutedText,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _pinkPrimary.withValues(alpha: 0.55),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _pinkPrimary.withValues(alpha: 0.25),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Your giving journey',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: _roseText,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Track completed and pending donations in one place.',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: _roseMutedText,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -408,7 +444,7 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
       label: 'Completed',
       value: '$completed',
       icon: Icons.check_circle_rounded,
-      tint: const Color(0xFF66BB6A),
+      tint: _pinkSoft,
     );
     final pendingCard = _buildStatCard(
       label: 'Pending',
@@ -425,30 +461,23 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 360;
-        if (isCompact) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(child: completedCard),
-                  const SizedBox(width: 10),
-                  Expanded(child: pendingCard),
-                ],
-              ),
-              const SizedBox(height: 10),
-              totalCard,
-            ],
-          );
-        }
+        final width = constraints.maxWidth;
+        final columns = width >= 860
+            ? 3
+            : width >= 520
+            ? 2
+            : 1;
+        final cardWidth = columns == 1
+            ? width
+            : (width - ((columns - 1) * 10)) / columns;
 
-        return Row(
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
           children: [
-            Expanded(child: completedCard),
-            const SizedBox(width: 10),
-            Expanded(child: pendingCard),
-            const SizedBox(width: 10),
-            Expanded(child: totalCard),
+            SizedBox(width: cardWidth, child: completedCard),
+            SizedBox(width: cardWidth, child: pendingCard),
+            SizedBox(width: cardWidth, child: totalCard),
           ],
         );
       },
@@ -514,9 +543,10 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
     required int completed,
     required int pending,
     required int total,
+    required double horizontalPadding,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -571,11 +601,11 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: _pinkLight,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.volunteer_activism_rounded,
                       size: 46,
                       color: _roseText,
@@ -641,7 +671,7 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
             child: Container(
               width: 4,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [_pinkPrimary, _roseText],
@@ -652,22 +682,24 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-            child: Row(
-              children: [
-                Container(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 430;
+
+                final leading = Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: _pinkLight,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.card_giftcard_rounded,
                     color: _roseText,
                     size: 22,
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
+                );
+
+                final titleAndSubtitle = Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -678,7 +710,7 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
                           fontSize: 14,
                           color: const Color(0xFF3B4150),
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
@@ -691,18 +723,109 @@ class _DonationHistoryScreenState extends State<DonationHistoryScreen> {
                       ),
                     ],
                   ),
-                ),
-                if (e.isCompleted)
-                  IconButton(
-                    icon: const Icon(
-                      Icons.receipt_long_rounded,
-                      color: _roseText,
-                    ),
-                    onPressed: () => _downloadReceipt(context, e.id),
-                    tooltip: 'Download receipt',
+                );
+
+                final statusBadge = StatusBadge(
+                  label: e.statusDisplay ?? e.status,
+                  small: true,
+                );
+
+                final pointsBadge = Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
                   ),
-                StatusBadge(label: e.statusDisplay ?? e.status, small: true),
-              ],
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryGreen.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: AppTheme.primaryGreen.withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Text(
+                    '+15 points earned',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryGreen,
+                    ),
+                  ),
+                );
+
+                final receiptAction = e.isCompleted
+                    ? OutlinedButton.icon(
+                        onPressed: () => _downloadReceipt(context, e.id),
+                        icon: const Icon(Icons.receipt_long_rounded, size: 16),
+                        label: Text(
+                          compact ? 'Receipt' : 'Download',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: _roseText,
+                          side: BorderSide(
+                            color: _pinkPrimary.withValues(alpha: 0.75),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      )
+                    : const SizedBox.shrink();
+
+                if (compact) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          leading,
+                          const SizedBox(width: 12),
+                          titleAndSubtitle,
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          statusBadge,
+                          if (e.isCompleted) pointsBadge,
+                          if (e.isCompleted) receiptAction,
+                        ],
+                      ),
+                    ],
+                  );
+                }
+
+                return Row(
+                  children: [
+                    leading,
+                    const SizedBox(width: 12),
+                    titleAndSubtitle,
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        statusBadge,
+                        if (e.isCompleted) ...[
+                          const SizedBox(height: 8),
+                          pointsBadge,
+                          const SizedBox(height: 8),
+                          receiptAction,
+                        ],
+                      ],
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],

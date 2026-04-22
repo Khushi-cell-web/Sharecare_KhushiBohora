@@ -77,7 +77,7 @@ class _ManageMyRequestsScreenState extends State<ManageMyRequestsScreen> {
       appBar: AppBar(
         title: const Text('Manage My Requests'),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.primaryPinkDark,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.maybePop(context),
@@ -90,7 +90,7 @@ class _ManageMyRequestsScreenState extends State<ManageMyRequestsScreen> {
         ],
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AppTheme.primaryTeal),
             )
           : _error != null

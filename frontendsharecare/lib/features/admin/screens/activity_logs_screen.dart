@@ -103,7 +103,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
         ],
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: AppTheme.primaryTeal),
             )
           : _error != null

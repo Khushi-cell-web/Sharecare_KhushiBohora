@@ -39,7 +39,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('OTP Verified'),
             backgroundColor: AppTheme.statusSuccess,
           ),
@@ -87,7 +87,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                 AppTheme.spaceLg,
                 AppTheme.spaceXl,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(28),

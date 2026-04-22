@@ -31,6 +31,8 @@ class FundsDonationScreen extends StatefulWidget {
 }
 
 class _FundsDonationScreenState extends State<FundsDonationScreen> {
+  static const double _usdToNprRate = 133.0;
+
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _purposeController = TextEditingController();
@@ -107,8 +109,60 @@ class _FundsDonationScreenState extends State<FundsDonationScreen> {
     return v ?? 0;
   }
 
-  double get _amountDollars => _amountValue.clamp(0.5, 999999.99);
-  int get _amountNpr => _amountValue.toInt().clamp(1, 999999);
+  double get _amountDollars {
+    if (_paymentMethod == _PaymentMethod.esewa) {
+      return (_amountValue / _usdToNprRate).clamp(0.5, 999999.99).toDouble();
+    }
+    return _amountValue.clamp(0.5, 999999.99).toDouble();
+  }
+
+  int get _amountNpr {
+    if (_paymentMethod == _PaymentMethod.stripe) {
+      return (_amountValue * _usdToNprRate).round().clamp(1, 999999).toInt();
+    }
+    return _amountValue.round().clamp(1, 999999).toInt();
+  }
+
+  double _convertAmount(
+    double amount, {
+    required _PaymentMethod from,
+    required _PaymentMethod to,
+  }) {
+    if (amount <= 0 || from == to) return amount;
+    if (from == _PaymentMethod.stripe && to == _PaymentMethod.esewa) {
+      return amount * _usdToNprRate;
+    }
+    if (from == _PaymentMethod.esewa && to == _PaymentMethod.stripe) {
+      return amount / _usdToNprRate;
+    }
+    return amount;
+  }
+
+  String _formatAmountForInput(double value, _PaymentMethod method) {
+    if (method == _PaymentMethod.esewa) {
+      return value.round().toString();
+    }
+    final fixed = value.toStringAsFixed(2);
+    return fixed.endsWith('.00') ? fixed.substring(0, fixed.length - 3) : fixed;
+  }
+
+  void _onPaymentMethodSelected(_PaymentMethod method) {
+    final current = _paymentMethod;
+    if (current == method) return;
+    final currentAmount = _amountValue;
+
+    setState(() {
+      if (current != null && currentAmount > 0) {
+        final converted = _convertAmount(
+          currentAmount,
+          from: current,
+          to: method,
+        );
+        _amountController.text = _formatAmountForInput(converted, method);
+      }
+      _paymentMethod = method;
+    });
+  }
 
   bool get _canProceed =>
       _selectedCampaign != null &&
@@ -169,7 +223,7 @@ class _FundsDonationScreenState extends State<FundsDonationScreen> {
       _paymentSucceeded = true;
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text(
           'Thank you! Your donation has been successfully processed.',
         ),
@@ -280,10 +334,11 @@ class _FundsDonationScreenState extends State<FundsDonationScreen> {
         amount: _amountDollars,
       );
     } on ShareCareApiException catch (e) {
-      if (e.statusCode == 400 ||
-          e.statusCode == 500 ||
-          e.body.contains('Stripe') ||
-          e.body.contains('configured')) {
+      final lowerBody = e.body.toLowerCase();
+      final looksStripeConfigIssue =
+          lowerBody.contains('stripe is not configured') ||
+          lowerBody.contains('set stripe_secret_key');
+      if (e.statusCode == 503 || looksStripeConfigIssue) {
         throw Exception(
           'Stripe is not configured on server. Add STRIPE_SECRET_KEY to backend .env or use eSewa.',
         );
@@ -357,7 +412,7 @@ class _FundsDonationScreenState extends State<FundsDonationScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Receipt opened'),
             backgroundColor: AppTheme.primaryGreen,
           ),
@@ -548,6 +603,16 @@ class _FundsDonationScreenState extends State<FundsDonationScreen> {
                 },
                 onChanged: (_) => setState(() {}),
               ),
+              if (_paymentMethod != null && _amountValue > 0)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    _paymentMethod == _PaymentMethod.esewa
+                        ? 'Approx. USD ${(_amountValue / _usdToNprRate).toStringAsFixed(2)} for card payment.'
+                        : 'Approx. NPR ${(_amountValue * _usdToNprRate).round()} for eSewa payment.',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  ),
+                ),
               const SizedBox(height: AppTheme.spaceLg),
               _SectionHeader(
                 icon: Icons.description_rounded,
@@ -578,8 +643,7 @@ class _FundsDonationScreenState extends State<FundsDonationScreen> {
                 title: 'eSewa',
                 subtitle: 'Nepal mobile wallet',
                 selected: _paymentMethod == _PaymentMethod.esewa,
-                onTap: () =>
-                    setState(() => _paymentMethod = _PaymentMethod.esewa),
+                onTap: () => _onPaymentMethodSelected(_PaymentMethod.esewa),
               ),
               const SizedBox(height: AppTheme.spaceSm),
               _PaymentMethodCard(
@@ -587,8 +651,7 @@ class _FundsDonationScreenState extends State<FundsDonationScreen> {
                 title: 'Stripe',
                 subtitle: 'Cards, Apple Pay & Google Pay (secure checkout)',
                 selected: _paymentMethod == _PaymentMethod.stripe,
-                onTap: () =>
-                    setState(() => _paymentMethod = _PaymentMethod.stripe),
+                onTap: () => _onPaymentMethodSelected(_PaymentMethod.stripe),
               ),
               if (_paymentMethod == null)
                 Padding(
@@ -682,7 +745,7 @@ class _FundsDonationScreenState extends State<FundsDonationScreen> {
                       builder: (_) => const DonationTrackingScreen(),
                     ),
                   ),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.check_circle_rounded,
                     color: AppTheme.primaryGreen,
                   ),
@@ -716,7 +779,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppTheme.primaryGreenDark,
@@ -784,10 +847,7 @@ class _PaymentMethodCard extends StatelessWidget {
                 ),
               ),
               if (selected)
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: AppTheme.primaryTeal,
-                ),
+                Icon(Icons.check_circle_rounded, color: AppTheme.primaryTeal),
             ],
           ),
         ),

@@ -417,7 +417,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                                                 borderRadius:
                                                     BorderRadius.circular(7),
                                               ),
-                                              child: const Icon(
+                                              child: Icon(
                                                 Icons
                                                     .admin_panel_settings_rounded,
                                                 size: 14,

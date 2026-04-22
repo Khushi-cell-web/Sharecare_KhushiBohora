@@ -5,9 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/theme/app_theme.dart';
+import '../core/constants/api_constants.dart';
 import '../core/utils/app_routes.dart';
 import '../shared/providers/auth_provider.dart';
-import '../core/config/app_config.dart';
 
 class BloodDonationScreen extends StatefulWidget {
   const BloodDonationScreen({super.key});
@@ -33,7 +33,7 @@ class _BloodDonationScreenState extends State<BloodDonationScreen> {
 
     try {
       final bloodRes = await http.get(
-        Uri.parse('${AppConfig.apiBaseUrl}/api/blood/status/'),
+        Uri.parse('${ApiConstants.baseUrl}/api/blood/status/'),
         headers: auth.authHeaders,
       );
       if (bloodRes.statusCode == 200) {
@@ -57,14 +57,14 @@ class _BloodDonationScreenState extends State<BloodDonationScreen> {
 
     try {
       final res = await http.post(
-        Uri.parse('${AppConfig.apiBaseUrl}/api/blood/register/'),
+        Uri.parse('${ApiConstants.baseUrl}/api/blood/register/'),
         headers: auth.authHeaders,
       );
       if (res.statusCode == 200) {
         await _loadData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Registered as blood donor!'),
               backgroundColor: AppTheme.statusSuccess,
             ),

@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../shared/providers/auth_provider.dart';
 import '../../shared/models/notification_model.dart';
 import '../../core/services/sharecare_api_service.dart';
+import '../../core/utils/app_routes.dart';
 import '../../core/utils/network_error_helper.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -71,7 +72,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 top: MediaQuery.of(context).padding.top + 12,
                 bottom: 24,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(28),
@@ -135,7 +136,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
           // Content
           if (_loading)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               child: Center(
                 child: CircularProgressIndicator(color: AppTheme.primaryTeal),
               ),
@@ -212,6 +213,37 @@ class _NotificationTile extends StatelessWidget {
   const _NotificationTile({required this.notification});
   final NotificationModel notification;
 
+  void _openNotification(BuildContext context) {
+    final type = notification.notificationType;
+
+    // Map notification types to routes that can be opened without extra payload.
+    if (type == 'offer_received' ||
+        type == 'offer_accepted' ||
+        type == 'offer_rejected' ||
+        type == 'request_created') {
+      Navigator.of(context).pushNamed(AppRoutes.manageMyRequests);
+      return;
+    }
+
+    if (type == 'donation_made') {
+      Navigator.of(context).pushNamed(AppRoutes.myOffers);
+      return;
+    }
+
+    if (type == 'task_assigned' || type == 'task_status_updated') {
+      Navigator.of(context).pushNamed(AppRoutes.volunteerTasks);
+      return;
+    }
+
+    if (notification.targetType == 'donation_request' &&
+        notification.targetId != null) {
+      Navigator.of(context).pushNamed(AppRoutes.browseDonationRequests);
+      return;
+    }
+
+    Navigator.of(context).pushNamed(AppRoutes.notifications);
+  }
+
   @override
   Widget build(BuildContext context) {
     String timeAgo = '';
@@ -243,16 +275,7 @@ class _NotificationTile extends StatelessWidget {
         boxShadow: AppTheme.cardShadow,
       ),
       child: GestureDetector(
-        onTap: () {
-          if (notification.notificationType == 'offer_received') {
-            Navigator.of(context).pushNamed('/ngo/manage-requests');
-          } else if (notification.notificationType == 'donation_made') {
-            Navigator.of(context).pushNamed('/my-offers');
-          } else if (notification.targetType == 'donation_request' &&
-              notification.targetId != null) {
-            Navigator.of(context).pushNamed('/request-detail');
-          }
-        },
+        onTap: () => _openNotification(context),
         child: IntrinsicHeight(
           child: Row(
             children: [

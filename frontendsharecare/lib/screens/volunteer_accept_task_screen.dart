@@ -21,15 +21,24 @@ class _VolunteerAcceptTaskScreenState extends State<VolunteerAcceptTaskScreen> {
   final _deliveryController = TextEditingController();
   bool _loading = false;
   String? _error;
+  DonationRequest? _request;
+  bool _initializedFromArgs = false;
 
   @override
   void initState() {
     super.initState();
-    final request =
-        ModalRoute.of(context)!.settings.arguments as DonationRequest?;
-    if (request != null) {
-      _pickupController.text = request.location;
-      _deliveryController.text = request.location;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initializedFromArgs) return;
+    _initializedFromArgs = true;
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is DonationRequest) {
+      _request = args;
+      _pickupController.text = args.location;
+      _deliveryController.text = args.location;
     }
   }
 
@@ -40,7 +49,12 @@ class _VolunteerAcceptTaskScreenState extends State<VolunteerAcceptTaskScreen> {
     super.dispose();
   }
 
-  Future<void> _submit(DonationRequest request) async {
+  Future<void> _submit() async {
+    final request = _request;
+    if (request == null) {
+      setState(() => _error = 'Unable to open this request. Please go back.');
+      return;
+    }
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _loading = true;
@@ -49,12 +63,30 @@ class _VolunteerAcceptTaskScreenState extends State<VolunteerAcceptTaskScreen> {
     final auth = context.read<AuthProvider>();
     final api = ShareCareApiService();
     try {
-      await api.createTask(
-        auth.authHeaders,
-        donationRequestId: request.id,
-        pickupLocation: _pickupController.text.trim(),
-        deliveryLocation: _deliveryController.text.trim(),
-      );
+      Future<void> createTask() async {
+        await api.createTask(
+          auth.authHeaders,
+          donationRequestId: request.id,
+          pickupLocation: _pickupController.text.trim(),
+          deliveryLocation: _deliveryController.text.trim(),
+        );
+      }
+
+      try {
+        await createTask();
+      } on ShareCareApiException catch (e) {
+        if (e.statusCode == 401) {
+          final refreshed = await auth.tryRefreshToken();
+          if (refreshed) {
+            await createTask();
+          } else {
+            rethrow;
+          }
+        } else {
+          rethrow;
+        }
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -75,8 +107,22 @@ class _VolunteerAcceptTaskScreenState extends State<VolunteerAcceptTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final request =
-        ModalRoute.of(context)!.settings.arguments! as DonationRequest;
+    final request = _request;
+
+    if (request == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Accept volunteer task')),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'Could not load this request. Please go back and try again.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Accept volunteer task')),
@@ -133,7 +179,7 @@ class _VolunteerAcceptTaskScreenState extends State<VolunteerAcceptTaskScreen> {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: _loading ? null : () => _submit(request),
+                onPressed: _loading ? null : _submit,
                 child: _loading
                     ? const SizedBox(
                         height: 24,

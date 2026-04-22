@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/theme/app_theme.dart';
+import '../core/constants/api_constants.dart';
 import '../shared/providers/auth_provider.dart';
-import '../core/config/app_config.dart';
 
 class OrganDonationScreen extends StatefulWidget {
   const OrganDonationScreen({super.key});
@@ -31,7 +31,7 @@ class _OrganDonationScreenState extends State<OrganDonationScreen> {
 
     try {
       final organRes = await http.get(
-        Uri.parse('${AppConfig.apiBaseUrl}/api/organ/status/'),
+        Uri.parse('${ApiConstants.baseUrl}/api/organ/status/'),
         headers: auth.authHeaders,
       );
       if (organRes.statusCode == 200) {
@@ -51,7 +51,7 @@ class _OrganDonationScreenState extends State<OrganDonationScreen> {
 
     try {
       final res = await http.post(
-        Uri.parse('${AppConfig.apiBaseUrl}/api/organ/pledge/'),
+        Uri.parse('${ApiConstants.baseUrl}/api/organ/pledge/'),
         headers: {...auth.authHeaders, 'Content-Type': 'application/json'},
         body: jsonEncode({'organ_pledge_details': 'General Pledge'}),
       );
@@ -60,7 +60,7 @@ class _OrganDonationScreenState extends State<OrganDonationScreen> {
         await _loadData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Registered as organ donor!'),
               backgroundColor: AppTheme.statusSuccess,
             ),
@@ -91,7 +91,7 @@ class _OrganDonationScreenState extends State<OrganDonationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Organ Donation'),
-        backgroundColor: Colors.teal[700],
+        backgroundColor: AppTheme.primaryPinkDark,
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -103,7 +103,7 @@ class _OrganDonationScreenState extends State<OrganDonationScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -116,7 +116,7 @@ class _OrganDonationScreenState extends State<OrganDonationScreen> {
                   children: [
                     Icon(
                       Icons.monitor_heart,
-                      color: Colors.teal[700],
+                      color: AppTheme.primaryPinkDark,
                       size: 28,
                     ),
                     const SizedBox(width: 12),
@@ -149,7 +149,7 @@ class _OrganDonationScreenState extends State<OrganDonationScreen> {
                     child: ElevatedButton(
                       onPressed: _pledgeOrgan,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal[700],
+                        backgroundColor: AppTheme.primaryPinkDark,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -170,8 +170,8 @@ class _OrganDonationScreenState extends State<OrganDonationScreen> {
               label: const Text('Learn More about Pledging'),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                foregroundColor: Colors.teal[700],
-                side: BorderSide(color: Colors.teal[700]!),
+                foregroundColor: AppTheme.primaryPinkDark,
+                side: BorderSide(color: AppTheme.primaryPinkDark),
               ),
             ),
           ),

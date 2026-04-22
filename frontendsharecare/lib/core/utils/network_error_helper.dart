@@ -38,6 +38,16 @@ class NetworkErrorHelper {
         return 'Session expired. Please log in again.';
       }
       if (error.statusCode == 403) {
+        final body = error.body.toLowerCase();
+        if (body.contains('verified') || body.contains('verification')) {
+          return 'Your organization must be verified before creating requests.';
+        }
+        if (body.contains('volunteer')) {
+          return 'This action is only available for volunteer accounts.';
+        }
+        if (body.contains('ngo') || body.contains('hospital')) {
+          return 'This action is only available for NGO/Hospital accounts.';
+        }
         return 'You don\'t have permission to do this.';
       }
       if (error.statusCode == 404) {
@@ -50,6 +60,18 @@ class NetworkErrorHelper {
           (error.body.contains('relation ') &&
               error.body.contains('does not exist')) ||
           (error.body.contains('api_user') && error.body.contains('exist'))) {
+        final msg = error.message.trim();
+        final lower = msg.toLowerCase();
+        final looksTechnical =
+            lower.contains('traceback') ||
+            lower.contains('exception') ||
+            lower.contains('programmingerror') ||
+            lower.contains('<!doctype') ||
+            lower.contains('<html') ||
+            lower.contains('does not exist');
+        if (msg.isNotEmpty && msg.length <= 180 && !looksTechnical) {
+          return msg;
+        }
         return 'Server is temporarily unavailable. Please try again later.';
       }
       if (error.statusCode == 400) {

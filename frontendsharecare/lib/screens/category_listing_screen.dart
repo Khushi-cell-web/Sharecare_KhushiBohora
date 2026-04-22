@@ -9,7 +9,7 @@ import 'category_requests_screen.dart';
 class CategoryListingScreen extends StatelessWidget {
   const CategoryListingScreen({super.key});
 
-  static const List<Map<String, dynamic>> _categories = [
+  static final List<Map<String, dynamic>> _categories = [
     {
       'key': 'food',
       'label': 'Food',
@@ -90,7 +90,7 @@ class CategoryListingScreen extends StatelessWidget {
   Widget _buildGradientHeader(BuildContext context, double topPadding) {
     return Container(
       padding: EdgeInsets.fromLTRB(20, topPadding + 8, 20, 36),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppTheme.primaryGreen,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(32),

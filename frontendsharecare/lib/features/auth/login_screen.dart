@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../shared/providers/auth_provider.dart';
 import '../../core/utils/app_routes.dart';
 import '../../core/utils/network_error_helper.dart';
+import '../../core/theme/app_theme.dart';
 import '../../services/google_auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -45,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(msg),
-            backgroundColor: const Color(0xFF2E7D5B),
+            backgroundColor: AppTheme.primaryPinkDark,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -67,8 +68,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (result.cancelled) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login Cancelled'),
+          SnackBar(
+            content: Text(
+              result.errorMessage ?? 'Google sign-in was cancelled.',
+            ),
             backgroundColor: Colors.orange,
             behavior: SnackBarBehavior.floating,
           ),
@@ -130,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(msg),
-              backgroundColor: const Color(0xFF2E7D5B),
+              backgroundColor: AppTheme.primaryPinkDark,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -154,14 +157,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     width: 70,
                     height: 70,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFE8F5E9),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryPinkLight,
                       shape: BoxShape.circle,
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Icon(
                         Icons.volunteer_activism,
-                        color: Color(0xFF2E7D5B),
+                        color: AppTheme.primaryPinkDark,
                         size: 36,
                       ),
                     ),
@@ -207,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2E7D5B),
+                          color: AppTheme.primaryPinkDark,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Center(
@@ -303,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           'Forgot Password?',
                           style: GoogleFonts.poppins(
-                            color: const Color(0xFF2E7D5B),
+                            color: AppTheme.primaryPinkDark,
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
                           ),
@@ -358,13 +361,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 icon: _isGoogleLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF2E7D5B),
+                            AppTheme.primaryPinkDark,
                           ),
                         ),
                       )
@@ -400,12 +403,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Colors.black87,
                         fontSize: 14,
                       ),
-                      children: const [
+                      children: [
                         TextSpan(text: "Don't have an account? "),
                         TextSpan(
                           text: 'Register',
                           style: TextStyle(
-                            color: Color(0xFF2E7D5B),
+                            color: AppTheme.primaryPinkDark,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -472,7 +475,7 @@ class CustomTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF2E7D5B), width: 1.5),
+          borderSide: BorderSide(color: AppTheme.primaryPinkDark, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -500,12 +503,14 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF2E7D5B),
-        disabledBackgroundColor: const Color(0xFF2E7D5B).withValues(alpha: 0.6),
+        backgroundColor: AppTheme.primaryPinkDark,
+        disabledBackgroundColor: AppTheme.primaryPinkDark.withValues(
+          alpha: 0.6,
+        ),
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 2,
-        shadowColor: const Color(0xFF2E7D5B).withValues(alpha: 0.4),
+        shadowColor: AppTheme.primaryPinkDark.withValues(alpha: 0.4),
       ),
       child: isLoading
           ? const SizedBox(

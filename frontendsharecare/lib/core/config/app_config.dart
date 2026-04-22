@@ -8,6 +8,9 @@ class AppConfig {
   static const String _apiBaseUrlFromDefine = String.fromEnvironment(
     'API_BASE_URL',
   );
+  static const String _googleServerClientIdFromDefine = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+  );
 
   static String get stripePublishableKey {
     try {
@@ -66,6 +69,9 @@ class AppConfig {
   /// Required by google_sign_in 7.x on Android when google-services.json is absent.
   static String? get googleServerClientId {
     try {
+      final fromDefine = _googleServerClientIdFromDefine.trim();
+      if (fromDefine.isNotEmpty) return fromDefine;
+
       final v = (dotenv.env['GOOGLE_SERVER_CLIENT_ID'] ?? '').trim();
       if (v.isEmpty) return null;
       return v;

@@ -175,7 +175,7 @@ class _OrganPledgeFormScreenState extends State<OrganPledgeFormScreen> {
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.primaryPinkDark,
       ),
       body: Form(
         key: _formKey,

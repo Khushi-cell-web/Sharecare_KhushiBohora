@@ -281,7 +281,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
               onChanged: (v) => setState(() => _searchQuery = v),
               decoration: InputDecoration(
                 hintText: 'Search by title, category, or organization...',
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.search_rounded,
                   color: AppTheme.primaryTeal,
                 ),

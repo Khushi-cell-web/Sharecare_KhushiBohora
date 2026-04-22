@@ -179,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               // Scrollable form
               Expanded(
                 child: Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppTheme.backgroundLight,
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(32),
@@ -617,7 +617,7 @@ class _StyledField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          borderSide: const BorderSide(color: AppTheme.primaryTeal, width: 1.5),
+          borderSide: BorderSide(color: AppTheme.primaryTeal, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),

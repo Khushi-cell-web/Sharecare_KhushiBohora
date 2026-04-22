@@ -92,10 +92,28 @@ class _UpdateTaskStatusScreenState extends State<UpdateTaskStatusScreen> {
       _error = null;
     });
     try {
-      await _api.updateTask(auth.authHeaders, taskId, taskStatus: _status);
+      Future<void> updateOnce() async {
+        await _api.updateTask(auth.authHeaders, taskId, taskStatus: _status);
+      }
+
+      try {
+        await updateOnce();
+      } on ShareCareApiException catch (e) {
+        if (e.statusCode == 401) {
+          final refreshed = await auth.tryRefreshToken();
+          if (refreshed) {
+            await updateOnce();
+          } else {
+            rethrow;
+          }
+        } else {
+          rethrow;
+        }
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Status updated'),
             backgroundColor: AppTheme.primaryGreen,
           ),
@@ -125,7 +143,7 @@ class _UpdateTaskStatusScreenState extends State<UpdateTaskStatusScreen> {
       appBar: AppBar(
         title: const Text('Update Task Status'),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.primaryPinkDark,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.maybePop(context),

@@ -62,7 +62,7 @@ class DonationCard extends StatelessWidget {
                       children: [
                         Text(
                           request.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                             color: AppTheme.primaryGreenDark,
@@ -129,7 +129,7 @@ class DonationCard extends StatelessWidget {
                           label: const Text('Chat'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.primaryTeal,
-                            side: const BorderSide(color: AppTheme.primaryTeal),
+                            side: BorderSide(color: AppTheme.primaryTeal),
                           ),
                         ),
                       ),
@@ -156,7 +156,7 @@ class DonationCard extends StatelessWidget {
                   onPressed: onTap,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.primaryGreen,
-                    side: const BorderSide(color: AppTheme.primaryGreen),
+                    side: BorderSide(color: AppTheme.primaryGreen),
                   ),
                   child: const Text('View Details'),
                 ),

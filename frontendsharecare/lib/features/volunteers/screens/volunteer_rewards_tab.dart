@@ -158,7 +158,7 @@ class _VolunteerRewardsTabState extends State<VolunteerRewardsTab> {
       body: RefreshIndicator(
         onRefresh: _load,
         child: _loading
-            ? const Center(
+            ? Center(
                 child: CircularProgressIndicator(color: AppTheme.primaryTeal),
               )
             : _error != null
@@ -228,7 +228,7 @@ class _VolunteerRewardsTabState extends State<VolunteerRewardsTab> {
   Widget _pointsCard(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [AppTheme.primaryTeal, AppTheme.primaryTealDark],
@@ -315,7 +315,7 @@ class _VolunteerRewardsTabState extends State<VolunteerRewardsTab> {
                 color: AppTheme.primaryTeal.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.card_giftcard_rounded,
                 color: AppTheme.primaryTeal,
               ),
@@ -382,10 +382,7 @@ class _VolunteerRewardsTabState extends State<VolunteerRewardsTab> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: const Icon(
-          Icons.verified_rounded,
-          color: AppTheme.statusSuccess,
-        ),
+        leading: Icon(Icons.verified_rounded, color: AppTheme.statusSuccess),
         title: Text(
           redemption.rewardName,
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),

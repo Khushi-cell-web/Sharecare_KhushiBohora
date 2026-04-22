@@ -77,7 +77,7 @@ class _VolunteerMapTabState extends State<VolunteerMapTab> {
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.primaryPinkDark,
         elevation: 0,
         actions: [
           IconButton(
@@ -148,7 +148,7 @@ class _VolunteerMapTabState extends State<VolunteerMapTab> {
                         backgroundColor: AppTheme.primaryGreen.withValues(
                           alpha: 0.2,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.delivery_dining_rounded,
                           color: AppTheme.primaryGreen,
                         ),

@@ -74,7 +74,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                 top: MediaQuery.of(context).padding.top + 16,
                 bottom: 48,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
@@ -161,7 +161,7 @@ class _VolunteerDashboardScreenState extends State<VolunteerDashboardScreen> {
                         _GradientBtn(
                           icon: Icons.search_rounded,
                           label: 'Browse Donation Requests',
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             colors: [
                               AppTheme.primaryGreen,
                               AppTheme.primaryGreenDark,

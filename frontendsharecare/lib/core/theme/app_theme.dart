@@ -6,36 +6,77 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   AppTheme._();
 
-  // Dark theme foundation
-  static const Color backgroundDark = Color(0xFF121212); // or 0xFF0F1F1A
-  static const Color surfaceDark = Color(0xFF1E1E1E);
-  static const Color surfaceDarker = Color(0xFF16231E); // dark green variation
+  static ThemeMode _activeThemeMode = ThemeMode.light;
 
-  // Primary brand palette
-  static const Color primaryGreen = Color(0xFF2ECC71); // main
-  static const Color primaryGreenDark = Color(0xFF1B5E20); // slightly darker
-  static const Color primaryGreenLight = Color(0xFF4EE48C);
+  static void setActiveThemeMode(ThemeMode mode) {
+    _activeThemeMode = mode;
+  }
+
+  static bool get _useDarkPalette {
+    if (_activeThemeMode == ThemeMode.dark) {
+      return true;
+    }
+    if (_activeThemeMode == ThemeMode.light) {
+      return false;
+    }
+    return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+        Brightness.dark;
+  }
+
+  // Dark theme foundation
+  static const Color backgroundDark = Color(0xFF0B1220);
+  static const Color surfaceDark = Color(0xFF172238);
+  static const Color surfaceDarker = Color(0xFF223149);
+  static const Color darkBlue = Color(0xFF6EA8FE);
+  static const Color darkBlueDeep = Color(0xFF2F5AA8);
+  static const Color darkBlueSoft = Color(0xFF9FC2FF);
+
+  // Donation History pink palette (source of truth for global theming)
+  static const Color _primaryPinkColorLight = Color(0xFFFFC1CC);
+  static const Color _primaryPinkLightLight = Color(0xFFFFEEF3);
+  static const Color _primaryPinkSoftLight = Color(0xFFFFD9E2);
+  static const Color _primaryPinkDarkLight = Color(0xFF8A4E5E);
+  static const Color _primaryPinkMutedLight = Color(0xFFB07A88);
+
+  static Color get primaryPinkColor =>
+      _useDarkPalette ? darkBlue : _primaryPinkColorLight;
+  static Color get primaryPinkLight =>
+      _useDarkPalette ? const Color(0xFF1A2740) : _primaryPinkLightLight;
+  static Color get primaryPinkSoft =>
+      _useDarkPalette ? const Color(0xFF264069) : _primaryPinkSoftLight;
+  static Color get primaryPinkDark =>
+      _useDarkPalette ? darkBlueDeep : _primaryPinkDarkLight;
+  static Color get primaryPinkMuted =>
+      _useDarkPalette ? darkBlueSoft : _primaryPinkMutedLight;
+
+  // Legacy aliases used throughout existing screens.
+  static Color get primaryGreen => _useDarkPalette ? darkBlue : primaryPinkColor;
+  static Color get primaryGreenDark =>
+      _useDarkPalette ? darkBlueDeep : primaryPinkDark;
+  static Color get primaryGreenLight =>
+      _useDarkPalette ? darkBlueSoft : primaryPinkSoft;
 
   // Secondary accents
   static const Color accentYellow = Color(0xFFF4B400); // soft yellow
   static const Color accentBrown = Color(0xFF8D6E63); // warm brown
-  static const Color accentTeal = Color(0xFF00796B); // dark teal depth
+  static Color get accentTeal =>
+      _useDarkPalette ? darkBlueSoft : primaryPinkMuted;
   static const Color accentOrange = Color(0xFFE65100); // muted orange
 
   /// Legacy names used by older screens.
-  static const Color primaryTeal = accentTeal;
-  static const Color primaryTealDark = Color(0xFF004D40);
+  static Color get primaryTeal => primaryGreen;
+  static Color get primaryTealDark => primaryGreenDark;
   static const Color ctaOrange = accentOrange;
   static const Color accentPurple = Color(0xFF9C27B0);
-  static const Color secondaryGreen = primaryGreen;
+  static Color get secondaryGreen => primaryGreen;
   static const Color accentPink = Color(0xFFEC407A);
   static const Color accentDark = Color(0xFF37474F);
-  static const Color accentGreen = primaryGreen;
+  static Color get accentGreen => primaryGreen;
   static const Color pastelBlueDeep = Color(0xFF64B5F6);
   static const Color statusPendingPastel = Color(0xFFFFF8E1);
-  static const Color statusVolunteerPastel = Color(0xFFE0F2F1);
-  static const Color statusCompletedPastel = Color(0xFFE8F5E9);
-  static const Color pastelMintLight = Color(0xFFF1F8E9);
+  static Color get statusVolunteerPastel => primaryPinkLight;
+  static Color get statusCompletedPastel => primaryPinkLight;
+  static Color get pastelMintLight => primaryPinkLight;
 
   // Typography
   static const Color textPrimary = Color(0xFFFFFFFF);
@@ -44,42 +85,46 @@ class AppTheme {
 
   // Status and chips
   static const Color chipUrgent = Color(0xFFE57373);
-  static const Color chipFilter = primaryGreen;
-  static const Color statusSuccess = Color(0xFF2ECC71);
+  static Color get chipFilter => primaryGreenDark;
+  static Color get statusSuccess => primaryGreenDark;
   static const Color statusWarning = accentYellow;
   static const Color statusError = Color(0xFFE57373);
 
   static const Color navy = Color(0xFF587281);
   static const Color navyLight = Color(0xFF90A4AE);
 
-  static const Color backgroundLight = Color(0xFFF0F4F8);
-  static const Color surfaceWhite = Color(0xFFFFFFFF);
-  static const Color impactGreen = primaryGreenLight;
+  static const Color _backgroundLight = Color(0xFFF0F4F8);
+  static const Color _surfaceWhite = Color(0xFFFFFFFF);
+  static Color get backgroundLight =>
+      _useDarkPalette ? backgroundDark : _backgroundLight;
+  static Color get surfaceWhite => _useDarkPalette ? surfaceDark : _surfaceWhite;
+  static Color get impactGreen => primaryGreenLight;
 
-  static const Color roleDonorAccent = primaryGreen;
-  static const Color roleVolunteerAccent = accentTeal;
+  static Color get roleDonorAccent => primaryGreen;
+  static Color get roleVolunteerAccent => accentTeal;
   static const Color roleNgoAccent = accentYellow;
 
-  static const Color appBarSurfaceLight = primaryGreen;
-  static const Color appBarOnSurfaceLight = Colors.white;
+  static Color get appBarSurfaceLight => primaryGreen;
+  static Color get appBarOnSurfaceLight =>
+      _useDarkPalette ? Colors.white : primaryPinkDark;
   static const Color textTertiary = Color(0xFF90A4AE);
   static const Color textMuted = Color(0xFF546E7A);
   static const Color accentBlue = Color(0xFF1E88E5);
   static const Color surfaceLightGrey = Color(0xFFF5F8FA);
 
   // Category colors
-  static const Color categoryFood = Color(0xFF1B5E20);
-  static const Color categoryClothes = Color(0xFF00796B);
+  static Color get categoryFood => primaryGreenDark;
+  static Color get categoryClothes => accentTeal;
   static const Color categoryFunds = Color(0xFFF4B400);
   static const Color categoryBlood = Color(0xFF8D6E63);
   static const Color categoryOrgan = Color(0xFF37474F);
 
-  static const Color categoryFoodIcon = Color(0xFF2ECC71);
-  static const Color categoryClothesIcon = Color(0xFF009688);
+  static Color get categoryFoodIcon => primaryGreenDark;
+  static Color get categoryClothesIcon => accentTeal;
   static const Color categoryFundsIcon = Color(0xFFFFD54F);
   static const Color categoryBloodIcon = Color(0xFFE53935);
   static const Color categoryOrganIcon = Color(0xFFB0BEC5);
-  static const Color categoryOtherIcon = Color(0xFF4DB6AC);
+  static Color get categoryOtherIcon => accentTeal;
 
   // Spacing
   static const double spaceXs = 4.0;
@@ -107,7 +152,7 @@ class AppTheme {
   // Shadow presets
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.3),
+      color: Colors.black.withValues(alpha: 0.3),
       blurRadius: 14,
       spreadRadius: 0,
       offset: const Offset(0, 4),
@@ -116,7 +161,7 @@ class AppTheme {
 
   static List<BoxShadow> get deepShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.5),
+      color: Colors.black.withValues(alpha: 0.5),
       blurRadius: 22,
       spreadRadius: -2,
       offset: const Offset(0, 8),
@@ -125,7 +170,7 @@ class AppTheme {
 
   static List<BoxShadow> colorShadow(Color color) => [
     BoxShadow(
-      color: color.withOpacity(0.22),
+      color: color.withValues(alpha: 0.22),
       blurRadius: 16,
       spreadRadius: -4,
       offset: const Offset(0, 6),
@@ -134,7 +179,7 @@ class AppTheme {
 
   static List<BoxShadow> get floatingShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.4),
+      color: Colors.black.withValues(alpha: 0.4),
       blurRadius: 28,
       spreadRadius: -4,
       offset: const Offset(0, 12),
@@ -143,7 +188,7 @@ class AppTheme {
 
   static List<BoxShadow> get softGlow => [
     BoxShadow(
-      color: primaryGreen.withOpacity(0.24),
+      color: primaryPinkColor.withValues(alpha: 0.24),
       blurRadius: 24,
       spreadRadius: -4,
       offset: const Offset(0, 8),
@@ -151,46 +196,46 @@ class AppTheme {
   ];
 
   // Legacy solid colors for old references.
-  static const Color headerSolid = primaryGreenDark;
-  static const Color ctaSolid = primaryGreen;
+  static Color get headerSolid => primaryGreenDark;
+  static Color get ctaSolid => primaryGreen;
 
   static ThemeData get lightTheme {
     return _buildTheme(
       ColorScheme.fromSeed(
-        seedColor: primaryGreen,
+        seedColor: _primaryPinkColorLight,
         brightness: Brightness.light,
       ),
       _buildTextTheme(textDark, textSecondary),
-      backgroundLight,
-      surfaceWhite,
-      primaryGreen,
-      textPrimary,
+      _backgroundLight,
+      _surfaceWhite,
+      _primaryPinkColorLight,
+      _primaryPinkDarkLight,
     );
   }
 
   static ThemeData get darkTheme {
-    final textTheme = _buildTextTheme(textPrimary, textSecondary);
+    final textTheme = _buildTextTheme(textPrimary, const Color(0xFFB8C5DB));
     final colorScheme =
         ColorScheme.fromSeed(
-          seedColor: primaryGreen,
+          seedColor: darkBlue,
           brightness: Brightness.dark,
         ).copyWith(
-          primary: primaryGreen,
-          onPrimary: textDark,
-          primaryContainer: primaryGreenDark,
-          onPrimaryContainer: textPrimary,
-          secondary: accentYellow,
-          onSecondary: textDark,
-          secondaryContainer: accentBrown,
-          onSecondaryContainer: textPrimary,
-          tertiary: accentTeal,
-          onTertiary: textPrimary,
+          primary: darkBlue,
+          onPrimary: Colors.white,
+          primaryContainer: darkBlueDeep,
+          onPrimaryContainer: Colors.white,
+          secondary: darkBlueSoft,
+          onSecondary: backgroundDark,
+          secondaryContainer: const Color(0xFF203152),
+          onSecondaryContainer: Colors.white,
+          tertiary: const Color(0xFF74B4FF),
+          onTertiary: Colors.white,
           surface: surfaceDark,
           onSurface: textPrimary,
           surfaceContainerHighest: surfaceDarker,
           error: statusError,
-          onError: textPrimary,
-          outline: Colors.white38,
+          onError: Colors.white,
+          outline: const Color(0xFF4A5C79),
         );
 
     return _buildTheme(
@@ -198,8 +243,8 @@ class AppTheme {
       textTheme,
       backgroundDark,
       surfaceDark,
-      backgroundDark, // Match background to remove gradient appbars
-      textPrimary,
+      colorScheme.primaryContainer,
+      Colors.white,
     );
   }
 
@@ -214,6 +259,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: colorScheme.brightness,
+      primaryColor: colorScheme.primary,
       scaffoldBackgroundColor: bgColor,
       colorScheme: colorScheme,
       textTheme: textTheme,
@@ -242,6 +288,10 @@ class AppTheme {
               : Brightness.light,
         ),
       ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+      ),
       cardTheme: CardThemeData(
         color: surfaceColor,
         elevation: elevationCard,
@@ -256,11 +306,11 @@ class AppTheme {
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) {
-              return colorScheme.primary.withOpacity(0.35);
+              return colorScheme.primary.withValues(alpha: 0.35);
             }
             if (states.contains(WidgetState.hovered) ||
                 states.contains(WidgetState.pressed)) {
-              return colorScheme.primary.withOpacity(0.8);
+              return colorScheme.primary.withValues(alpha: 0.8);
             }
             return colorScheme.primary;
           }),
@@ -283,11 +333,11 @@ class AppTheme {
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) {
-              return colorScheme.primary.withOpacity(0.35);
+              return colorScheme.primary.withValues(alpha: 0.35);
             }
             if (states.contains(WidgetState.hovered) ||
                 states.contains(WidgetState.pressed)) {
-              return colorScheme.primary.withOpacity(0.8);
+              return colorScheme.primary.withValues(alpha: 0.8);
             }
             return colorScheme.primary;
           }),
@@ -323,6 +373,23 @@ class AppTheme {
           ),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colorScheme.primary.withValues(alpha: 0.5);
+            }
+            if (states.contains(WidgetState.hovered) ||
+                states.contains(WidgetState.pressed)) {
+              return colorScheme.primary.withValues(alpha: 0.8);
+            }
+            return colorScheme.primary;
+          }),
+          textStyle: WidgetStatePropertyAll(
+            GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colorScheme.surface,
@@ -336,7 +403,9 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusSm),
-          borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.5)),
+          borderSide: BorderSide(
+            color: colorScheme.outline.withValues(alpha: 0.5),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusSm),
@@ -351,7 +420,9 @@ class AppTheme {
           borderSide: BorderSide(color: colorScheme.error, width: 2),
         ),
         labelStyle: GoogleFonts.inter(color: textSecondary),
-        hintStyle: GoogleFonts.inter(color: textSecondary.withOpacity(0.7)),
+        hintStyle: GoogleFonts.inter(
+          color: textSecondary.withValues(alpha: 0.7),
+        ),
       ),
       iconTheme: IconThemeData(color: textPrimary, size: 24),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -376,6 +447,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(radiusSm),
         ),
         behavior: SnackBarBehavior.floating,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: colorScheme.primary,
+        linearTrackColor: colorScheme.primary.withValues(alpha: 0.18),
       ),
     );
   }
@@ -439,13 +514,13 @@ class AppTheme {
   }
 
   // Compatibility gradients (using solid colors)
-  static const LinearGradient headerGradient = LinearGradient(
+  static LinearGradient get headerGradient => LinearGradient(
     colors: [primaryGreenDark, primaryGreenDark],
   );
-  static const LinearGradient headerGradientWarm = LinearGradient(
+  static LinearGradient get headerGradientWarm => const LinearGradient(
     colors: [accentYellow, accentYellow],
   );
-  static const LinearGradient ctaGradient = LinearGradient(
+  static LinearGradient get ctaGradient => LinearGradient(
     colors: [primaryGreen, primaryGreen],
   );
   static const LinearGradient loginGradient = LinearGradient(
@@ -453,28 +528,28 @@ class AppTheme {
     end: Alignment.bottomRight,
     colors: [Color(0xFF1E3C72), Color(0xFF2A5298)],
   );
-  static const LinearGradient purpleGradient = LinearGradient(
+  static LinearGradient get purpleGradient => LinearGradient(
     colors: [accentTeal, accentTeal],
   );
-  static const LinearGradient pinkGradient = LinearGradient(
+  static LinearGradient get pinkGradient => const LinearGradient(
     colors: [accentBrown, accentBrown],
   );
-  static const LinearGradient blueGradient = LinearGradient(
+  static LinearGradient get blueGradient => LinearGradient(
     colors: [primaryGreenDark, primaryGreenDark],
   );
-  static const LinearGradient greenGradient = LinearGradient(
+  static LinearGradient get greenGradient => LinearGradient(
     colors: [primaryGreen, primaryGreen],
   );
-  static const LinearGradient sunsetGradient = LinearGradient(
+  static LinearGradient get sunsetGradient => const LinearGradient(
     colors: [accentYellow, accentYellow],
   );
-  static const LinearGradient peachyGradient = LinearGradient(
+  static LinearGradient get peachyGradient => const LinearGradient(
     colors: [accentBrown, accentBrown],
   );
-  static const LinearGradient orangeGradient = LinearGradient(
+  static LinearGradient get orangeGradient => const LinearGradient(
     colors: [accentYellow, accentYellow],
   );
-  static const LinearGradient purpleBlueGradient = LinearGradient(
+  static LinearGradient get purpleBlueGradient => LinearGradient(
     colors: [accentTeal, accentTeal],
   );
 }

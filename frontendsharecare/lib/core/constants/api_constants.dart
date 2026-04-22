@@ -9,10 +9,25 @@ class ApiConstants {
 
   /// Android fallback base URL resolved in [initialize].
   static String? _androidAutoBaseUrl;
+  static String? _runtimeBaseUrlOverride;
+
+  static String? _normalizeOrigin(String? origin) {
+    final trimmed = origin?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed.replaceFirst(RegExp(r'/$'), '');
+  }
+
+  /// Overrides the resolved API origin for the current app session.
+  static void setRuntimeBaseUrl(String? baseUrl) {
+    final normalized = _normalizeOrigin(baseUrl);
+    if (normalized == null) return;
+    _runtimeBaseUrlOverride = normalized;
+  }
 
   /// Call once after dotenv is loaded.
   static Future<void> initialize() async {
     _androidAutoBaseUrl = null;
+    _runtimeBaseUrlOverride = null;
     try {
       if (AppConfig.apiBaseUrl != null) return;
       if (kIsWeb) return;
@@ -23,7 +38,7 @@ class ApiConstants {
           : 'http://10.0.2.2:8000';
     } catch (_) {
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-        _androidAutoBaseUrl = 'http://10.0.2.2:8000';
+        _androidAutoBaseUrl = AppConfig.apiLanFallbackBaseUrl;
       }
     }
   }
@@ -33,10 +48,14 @@ class ApiConstants {
 
   /// Uses env value when available; otherwise falls back to platform defaults.
   static String get baseUrl {
+    final runtime = _runtimeBaseUrlOverride;
+    if (runtime != null && runtime.isNotEmpty) {
+      return runtime;
+    }
     try {
       final env = AppConfig.apiBaseUrl;
       if (env != null && env.isNotEmpty) {
-        return env.replaceFirst(RegExp(r'/$'), '');
+        return _normalizeOrigin(env)!;
       }
     } catch (_) {
       // dotenv not loaded yet (e.g. tests) - use defaults
@@ -55,9 +74,10 @@ class ApiConstants {
       return 'http://localhost:8000';
     }
 
-    // If initialize has not run on Android yet, use emulator host.
+    // If initialize has not run on Android yet, prefer localhost so adb reverse
+    // works on physical devices; ApiService will still fall back to LAN if needed.
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:8000';
+      return 'http://127.0.0.1:8000';
     }
 
     // iOS simulator can use localhost.
@@ -71,6 +91,10 @@ class ApiConstants {
 
   /// WebSocket origin aligned with [baseUrl].
   static String get wsBaseUrl {
+    final runtime = _runtimeBaseUrlOverride;
+    if (runtime != null && runtime.isNotEmpty) {
+      return _httpToWs(runtime);
+    }
     try {
       final env = AppConfig.apiBaseUrl;
       if (env != null && env.isNotEmpty) {
@@ -93,7 +117,7 @@ class ApiConstants {
     }
 
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'ws://10.0.2.2:8000';
+      return 'ws://127.0.0.1:8000';
     }
 
     return 'ws://localhost:8000';

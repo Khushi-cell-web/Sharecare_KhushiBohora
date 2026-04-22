@@ -75,7 +75,7 @@ class _TaskHistoryScreenState extends State<TaskHistoryScreen> {
       appBar: AppBar(
         title: const Text('Task History'),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.primaryPinkDark,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.maybePop(context),

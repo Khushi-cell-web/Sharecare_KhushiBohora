@@ -165,7 +165,7 @@ class _LeafletDonationMapScreenState extends State<LeafletDonationMapScreen> {
   Color _colorForCategory(String category) {
     switch (category.toLowerCase()) {
       case 'food':
-        return Colors.green;
+        return AppTheme.primaryPinkDark;
       case 'clothes':
         return Colors.blue;
       case 'funds':
@@ -173,7 +173,7 @@ class _LeafletDonationMapScreenState extends State<LeafletDonationMapScreen> {
       case 'blood':
         return Colors.red;
       case 'organ':
-        return Colors.pink;
+        return AppTheme.primaryPinkColor;
       default:
         return Colors.grey;
     }

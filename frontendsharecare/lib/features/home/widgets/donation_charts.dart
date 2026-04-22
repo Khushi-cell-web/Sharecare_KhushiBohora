@@ -8,7 +8,7 @@ import '../../../core/utils/network_error_helper.dart';
 import '../../../shared/providers/auth_provider.dart';
 
 /// Category colors for pie chart.
-const Map<String, Color> _categoryColors = {
+final Map<String, Color> _categoryColors = {
   'food': AppTheme.categoryFood,
   'clothes': AppTheme.categoryClothes,
   'funds': AppTheme.categoryFunds,
@@ -70,7 +70,7 @@ class _DonationChartsSectionState extends State<DonationChartsSection> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const SizedBox(
+      return SizedBox(
         height: 200,
         child: Center(
           child: CircularProgressIndicator(color: AppTheme.primaryTeal),
@@ -326,7 +326,7 @@ class RequestFulfillmentBarChart extends StatelessWidget {
   final List<dynamic> data;
   final double height;
 
-  static const List<Color> _statusColors = [
+  static final List<Color> _statusColors = [
     AppTheme.ctaOrange,
     Colors.amber,
     AppTheme.primaryGreen,

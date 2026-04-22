@@ -393,7 +393,7 @@ class _DonationOfferScreenState extends State<DonationOfferScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(
+                    borderSide: BorderSide(
                       color: AppTheme.primaryTeal,
                       width: 2,
                     ),
@@ -444,7 +444,7 @@ class _DonationOfferScreenState extends State<DonationOfferScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(
+                    borderSide: BorderSide(
                       color: AppTheme.primaryTeal,
                       width: 2,
                     ),
@@ -510,7 +510,7 @@ class _DonationOfferScreenState extends State<DonationOfferScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(
+                        borderSide: BorderSide(
                           color: AppTheme.primaryTeal,
                           width: 2,
                         ),

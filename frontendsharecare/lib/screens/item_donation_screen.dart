@@ -127,9 +127,9 @@ class _ItemDonationScreenState extends State<ItemDonationScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Donation submitted successfully! Thanks for your help.',
+              'Donation submitted successfully. It will appear in the NGO review queue shortly.',
             ),
             backgroundColor: AppTheme.statusSuccess,
           ),
@@ -168,6 +168,7 @@ class _ItemDonationScreenState extends State<ItemDonationScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: _category,
                 decoration: const InputDecoration(
                   labelText: 'Category',
@@ -259,17 +260,25 @@ class _ItemDonationScreenState extends State<ItemDonationScreen> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: _fulfillment,
                 decoration: const InputDecoration(border: OutlineInputBorder()),
                 items: const [
                   DropdownMenuItem(
                     value: 'self_dropoff',
-                    child: Text('Self Delivery (Drop off at NGO later)'),
+                    child: Text(
+                      'Self Delivery (Drop off at NGO later)',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 'volunteer_pickup',
                     child: Text('Volunteer Pickup'),
                   ),
+                ],
+                selectedItemBuilder: (context) => const [
+                  Text('Self Delivery', overflow: TextOverflow.ellipsis),
+                  Text('Volunteer Pickup', overflow: TextOverflow.ellipsis),
                 ],
                 onChanged: (v) => setState(() {
                   _fulfillment = v ?? 'self_dropoff';
@@ -283,7 +292,7 @@ class _ItemDonationScreenState extends State<ItemDonationScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

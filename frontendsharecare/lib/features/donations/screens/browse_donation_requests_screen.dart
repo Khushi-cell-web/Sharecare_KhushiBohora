@@ -65,7 +65,7 @@ class _BrowseDonationRequestsScreenState
         centerTitle: true,
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(color: SoftTheme.primaryTeal),
             )
           : _error != null
@@ -161,7 +161,7 @@ class _StyledRequestCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.location_on_outlined,
                 size: 16,
                 color: SoftTheme.textLight,

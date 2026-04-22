@@ -34,7 +34,7 @@ class TaskDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Task Details'),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.primaryPinkDark,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.maybePop(context),
@@ -91,7 +91,7 @@ class TaskDetailsScreen extends StatelessWidget {
                   label: const Text('Live delivery status'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.primaryGreen,
-                    side: const BorderSide(color: AppTheme.primaryGreen),
+                    side: BorderSide(color: AppTheme.primaryGreen),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -131,7 +131,7 @@ class TaskDetailsScreen extends StatelessWidget {
                   label: const Text('Chat with donor'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.primaryTeal,
-                    side: const BorderSide(color: AppTheme.primaryTeal),
+                    side: BorderSide(color: AppTheme.primaryTeal),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -169,7 +169,7 @@ class TaskDetailsScreen extends StatelessWidget {
                   label: const Text('Chat with NGO'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.primaryGreen,
-                    side: const BorderSide(color: AppTheme.primaryGreen),
+                    side: BorderSide(color: AppTheme.primaryGreen),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

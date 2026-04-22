@@ -68,7 +68,7 @@ class _MyOffersScreenState extends State<MyOffersScreen> {
       body: RefreshIndicator(
         onRefresh: _loadOffers,
         child: _loading
-            ? const Center(
+            ? Center(
                 child: CircularProgressIndicator(color: AppTheme.primaryTeal),
               )
             : _error != null

@@ -21,6 +21,7 @@ import 'screens/item_donation_screen.dart';
 import 'screens/category_donation/funds_donation_screen.dart';
 import 'screens/create_donation_screen.dart';
 import 'screens/donation_history_screen.dart';
+import 'screens/my_donation_records_screen.dart';
 import 'screens/leaflet_donation_map_screen.dart';
 import 'screens/life_donations_screen.dart';
 import 'screens/blood_donation_screen.dart';
@@ -71,6 +72,7 @@ import 'features/volunteers/screens/task_history_screen.dart';
 import 'features/volunteers/screens/update_task_status_screen.dart';
 import 'features/volunteers/screens/delivery_task_tracking_screen.dart';
 import 'features/volunteers/screens/leaflet_volunteer_task_map_screen.dart';
+import 'features/rewards/screens/rewards_screen.dart';
 import 'shared/models/volunteer_task.dart';
 
 void _registerWebViewPlatform() {}
@@ -109,29 +111,63 @@ void main() async {
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
-class ShareCareApp extends StatelessWidget {
+class ShareCareApp extends StatefulWidget {
   const ShareCareApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<ShareCareApp> createState() => _ShareCareAppState();
+}
+
+class _ShareCareAppState extends State<ShareCareApp> {
+  late final AuthProvider _authProvider;
+  late final ThemeProvider _themeProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _authProvider = AuthProvider();
+    _themeProvider = ThemeProvider();
+    _authProvider.loadTokens();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupFcmForegroundHandlers();
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()..loadTokens()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider<AuthProvider>.value(value: _authProvider),
+        ChangeNotifierProvider<ThemeProvider>.value(value: _themeProvider),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
+          final baseLightTheme = AppTheme.lightTheme;
+          final pinkLightTheme = baseLightTheme.copyWith(
+            primaryColor: AppTheme.primaryPinkColor,
+            colorScheme: baseLightTheme.colorScheme.copyWith(
+              primary: AppTheme.primaryPinkColor,
+              onPrimary: AppTheme.primaryPinkDark,
+            ),
+            appBarTheme: baseLightTheme.appBarTheme.copyWith(
+              backgroundColor: AppTheme.primaryPinkColor,
+              foregroundColor: AppTheme.primaryPinkDark,
+            ),
+            elevatedButtonTheme: baseLightTheme.elevatedButtonTheme,
+            floatingActionButtonTheme: FloatingActionButtonThemeData(
+              backgroundColor: AppTheme.primaryPinkColor,
+              foregroundColor: AppTheme.primaryPinkDark,
+            ),
+          );
+
           return MaterialApp(
             scaffoldMessengerKey: _scaffoldMessengerKey,
             title: 'ShareCare',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
+            theme: pinkLightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
-            initialRoute: AppRoutes.home,
+            home: const AuthGateScreen(),
             onGenerateRoute: _generateRoute,
           );
         },
@@ -311,6 +347,8 @@ Route<dynamic>? _generateRoute(RouteSettings settings) {
       );
     case AppRoutes.taskHistory:
       return MaterialPageRoute(builder: (_) => const TaskHistoryScreen());
+    case AppRoutes.rewards:
+      return MaterialPageRoute(builder: (_) => const RewardsScreen());
     case AppRoutes.volunteerMap:
       final task = settings.arguments as VolunteerTask?;
       if (task == null) {
@@ -360,11 +398,11 @@ Route<dynamic>? _generateRoute(RouteSettings settings) {
       final roomScreen = ChatRoomScreen.fromArguments(settings.arguments);
       if (roomScreen == null) {
         return MaterialPageRoute(
-          builder: (_) => Scaffold(
+          builder: (context) => Scaffold(
             appBar: AppBar(
               title: const Text('Chat'),
-              backgroundColor: AppTheme.primaryGreen,
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             body: const Center(child: Text('Unable to open chat')),
           ),
@@ -375,11 +413,11 @@ Route<dynamic>? _generateRoute(RouteSettings settings) {
       final legacyRoom = ChatRoomScreen.fromArguments(settings.arguments);
       if (legacyRoom == null) {
         return MaterialPageRoute(
-          builder: (_) => Scaffold(
+          builder: (context) => Scaffold(
             appBar: AppBar(
               title: const Text('Chat'),
-              backgroundColor: AppTheme.primaryGreen,
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             body: const Center(child: Text('Unable to open chat')),
           ),
@@ -401,6 +439,8 @@ Route<dynamic>? _generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (_) => const SearchFilterScreen());
     case AppRoutes.donationHistory:
       return MaterialPageRoute(builder: (_) => const DonationHistoryScreen());
+    case AppRoutes.myDonationRecords:
+      return MaterialPageRoute(builder: (_) => const MyDonationRecordsScreen());
     case AppRoutes.requestHistory:
       return MaterialPageRoute(builder: (_) => const RequestHistoryScreen());
     case AppRoutes.emptyState:

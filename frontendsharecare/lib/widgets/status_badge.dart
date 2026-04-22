@@ -17,12 +17,15 @@ class StatusBadge extends StatelessWidget {
 
   static Color colorForStatus(String status) {
     final s = status.toLowerCase();
-    if (s == 'fulfilled' || s == 'completed' || s == 'delivered')
+    if (s == 'fulfilled' || s == 'completed' || s == 'delivered') {
       return AppTheme.statusSuccess;
-    if (s == 'open' || s == 'pending' || s == 'assigned')
+    }
+    if (s == 'open' || s == 'pending' || s == 'assigned') {
       return AppTheme.primaryTeal;
-    if (s == 'matched' || s == 'accepted' || s == 'picked')
+    }
+    if (s == 'matched' || s == 'accepted' || s == 'picked') {
       return AppTheme.statusWarning;
+    }
     if (s == 'closed' || s == 'rejected') return Colors.grey;
     if (s == 'urgent' || s == 'high') return AppTheme.chipUrgent;
     return AppTheme.primaryTeal;

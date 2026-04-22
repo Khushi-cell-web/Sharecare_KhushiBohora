@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/services/sharecare_api_service.dart';
 import '../../../shared/providers/auth_provider.dart';
 
@@ -90,16 +91,16 @@ class _P2PDonationTrackingScreenState extends State<P2PDonationTrackingScreen> {
         if (currentStatus == 'COMPLETED')
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.green.withValues(alpha: 0.1),
-            child: const Row(
+            color: AppTheme.primaryPinkColor.withValues(alpha: 0.2),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.celebration, color: Colors.green),
+                Icon(Icons.celebration, color: AppTheme.primaryPinkDark),
                 SizedBox(width: 8),
                 Text(
                   '🎊 Donation Successful!',
                   style: TextStyle(
-                    color: Colors.green,
+                    color: AppTheme.primaryPinkDark,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
@@ -129,7 +130,7 @@ class _P2PDonationTrackingScreenState extends State<P2PDonationTrackingScreen> {
               isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
               color: isCurrent
                   ? Colors.blue
-                  : (isCompleted ? Colors.green : Colors.grey),
+                  : (isCompleted ? AppTheme.primaryPinkDark : Colors.grey),
             ),
             title: Text(
               status,
@@ -207,7 +208,9 @@ class _P2PDonationTrackingScreenState extends State<P2PDonationTrackingScreen> {
     if (currentStatus == 'ON_THE_WAY') {
       if (isReceiver) {
         return ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryPinkDark,
+          ),
           onPressed: () => _updateStatus('complete_donation'),
           child: const Text('Confirm Item Received'),
         );

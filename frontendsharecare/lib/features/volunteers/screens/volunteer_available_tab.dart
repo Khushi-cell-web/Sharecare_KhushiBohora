@@ -32,6 +32,23 @@ class _VolunteerAvailableTabState extends State<VolunteerAvailableTab> {
   double? _userLat;
   double? _userLng;
 
+  Future<T> _runWithAuthRetry<T>(
+    Future<T> Function(Map<String, String> headers) operation,
+  ) async {
+    final auth = context.read<AuthProvider>();
+    try {
+      return await operation(auth.authHeaders);
+    } on ShareCareApiException catch (e) {
+      if (e.statusCode == 401) {
+        final refreshed = await auth.tryRefreshToken();
+        if (refreshed) {
+          return await operation(auth.authHeaders);
+        }
+      }
+      rethrow;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -72,6 +89,13 @@ class _VolunteerAvailableTabState extends State<VolunteerAvailableTab> {
         });
       }
     } on ShareCareApiException catch (e) {
+      if (e.statusCode == 401) {
+        final refreshed = await auth.tryRefreshToken();
+        if (refreshed) {
+          _load();
+          return;
+        }
+      }
       if (mounted) {
         setState(() {
           _error = NetworkErrorHelper.toUserMessage(e);
@@ -110,7 +134,9 @@ class _VolunteerAvailableTabState extends State<VolunteerAvailableTab> {
     final auth = context.read<AuthProvider>();
     if (!auth.isAuthenticated) return;
     try {
-      await _api.claimVolunteerTask(auth.authHeaders, task.id);
+      await _runWithAuthRetry(
+        (headers) => _api.claimVolunteerTask(headers, task.id),
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -131,6 +157,15 @@ class _VolunteerAvailableTabState extends State<VolunteerAvailableTab> {
           ),
         );
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(NetworkErrorHelper.toUserMessage(e)),
+            backgroundColor: AppTheme.statusError,
+          ),
+        );
+      }
     }
   }
 
@@ -138,9 +173,20 @@ class _VolunteerAvailableTabState extends State<VolunteerAvailableTab> {
     final auth = context.read<AuthProvider>();
     if (!auth.isAuthenticated) return;
     try {
-      await _api.declineVolunteerTask(auth.authHeaders, task.id);
+      await _runWithAuthRetry(
+        (headers) => _api.declineVolunteerTask(headers, task.id),
+      );
       if (mounted) _load();
     } on ShareCareApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(NetworkErrorHelper.toUserMessage(e)),
+            backgroundColor: AppTheme.statusError,
+          ),
+        );
+      }
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -170,7 +216,7 @@ class _VolunteerAvailableTabState extends State<VolunteerAvailableTab> {
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
         title: Text(
-          'Available for Pickup',
+          'Accepted Donations to Claim',
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         backgroundColor: AppTheme.primaryTeal,
@@ -241,13 +287,13 @@ class _VolunteerAvailableTabState extends State<VolunteerAvailableTab> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   if (_pending.isNotEmpty) ...[
-                    _sectionTitle('Pending pickups — tap Claim'),
+                    _sectionTitle('Accepted donations — tap Claim'),
                     const SizedBox(height: 8),
                     ..._pending.map((t) => _pendingTaskCard(t)),
                     if (_legacy.isNotEmpty) const SizedBox(height: 20),
                   ],
                   if (_legacy.isNotEmpty) ...[
-                    _sectionTitle('Other campaigns (no task yet)'),
+                    _sectionTitle('Legacy request pickups (no task yet)'),
                     const SizedBox(height: 8),
                     ..._legacy.map((r) {
                       final dist = _distanceKm(r);

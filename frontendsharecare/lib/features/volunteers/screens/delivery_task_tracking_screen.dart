@@ -104,7 +104,7 @@ class _DeliveryTaskTrackingScreenState
       appBar: AppBar(
         title: const Text('Live delivery status'),
         backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: AppTheme.primaryPinkDark,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.maybePop(context),

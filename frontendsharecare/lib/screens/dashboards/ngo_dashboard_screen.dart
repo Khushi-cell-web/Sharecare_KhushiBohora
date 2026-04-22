@@ -73,7 +73,7 @@ class _NgoDashboardScreenState extends State<NgoDashboardScreen> {
                 top: MediaQuery.of(context).padding.top + 16,
                 bottom: 48,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
@@ -141,7 +141,7 @@ class _NgoDashboardScreenState extends State<NgoDashboardScreen> {
                         _GradientActionBtn(
                           icon: Icons.add_rounded,
                           label: 'Create Donation Request',
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             colors: [
                               AppTheme.primaryGreen,
                               AppTheme.primaryGreenDark,

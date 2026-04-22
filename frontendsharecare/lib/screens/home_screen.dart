@@ -167,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ? auth.user!.firstName!
         : (auth.user?.username ?? 'Guest');
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -218,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String displayName,
     AuthProvider auth,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SliverToBoxAdapter(
       child: Container(
         width: double.infinity,
@@ -227,8 +228,8 @@ class _HomeScreenState extends State<HomeScreen> {
           top: MediaQuery.of(context).padding.top + 16,
           bottom: 24,
         ),
-        decoration: const BoxDecoration(
-          color: AppTheme.primaryGreen,
+        decoration: BoxDecoration(
+          color: colorScheme.primary,
           borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(32),
             bottomRight: Radius.circular(32),
@@ -242,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Icon(
                 Icons.volunteer_activism_rounded,
                 size: 120,
-                color: Colors.white.withValues(alpha: 0.06),
+                color: colorScheme.onPrimary.withValues(alpha: 0.08),
               ),
             ),
             Column(
@@ -260,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: 26,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: colorScheme.onPrimary,
                               height: 1.2,
                             ),
                           ),
@@ -269,7 +270,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             'Explore campaigns and donate with confidence',
                             style: GoogleFonts.poppins(
                               fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.85),
+                              color: colorScheme.onPrimary.withValues(
+                                alpha: 0.85,
+                              ),
                             ),
                           ),
                         ],
@@ -283,6 +286,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () => Navigator.of(
                             context,
                           ).pushNamed(AppRoutes.conversations),
+                          foregroundColor: colorScheme.onPrimary,
+                          backgroundColor: colorScheme.onPrimary.withValues(
+                            alpha: 0.15,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         _HeaderIconButton(
@@ -291,6 +298,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () => Navigator.of(
                             context,
                           ).pushNamed(AppRoutes.notifications),
+                          foregroundColor: colorScheme.onPrimary,
+                          backgroundColor: colorScheme.onPrimary.withValues(
+                            alpha: 0.15,
+                          ),
+                          badgeColor: colorScheme.secondary,
+                          badgeBorderColor: colorScheme.primary,
                         ),
                       ],
                     ),
@@ -305,17 +318,31 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildImpactCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = colorScheme.primary;
+    final accentDeep =
+        isDark ? colorScheme.primaryContainer : AppTheme.primaryTealDark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? colorScheme.surface : Colors.white,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         border: Border.all(
-          color: AppTheme.primaryTeal.withValues(alpha: 0.22),
+          color: accent.withValues(alpha: isDark ? 0.35 : 0.22),
           width: 1,
         ),
-        boxShadow: AppTheme.deepShadow,
+        boxShadow: isDark
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : AppTheme.deepShadow,
       ),
       child: Row(
         children: [
@@ -326,10 +353,10 @@ class _HomeScreenState extends State<HomeScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [AppTheme.primaryTeal, AppTheme.primaryTealDark],
+                colors: [accent, accentDeep],
               ),
               borderRadius: BorderRadius.circular(16),
-              boxShadow: AppTheme.colorShadow(AppTheme.primaryTeal),
+              boxShadow: AppTheme.colorShadow(accent),
             ),
             child: const Icon(
               Icons.show_chart_rounded,
@@ -346,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   'Your Impact',
                   style: GoogleFonts.poppins(
                     fontSize: 13,
-                    color: AppTheme.navyLight,
+                    color: colorScheme.onSurface.withValues(alpha: 0.72),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -356,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppTheme.navy,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -365,7 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: AppTheme.primaryTeal.withValues(alpha: 0.08),
+              color: accent.withValues(alpha: isDark ? 0.16 : 0.08),
               borderRadius: BorderRadius.circular(20),
             ),
             child: GestureDetector(
@@ -374,7 +401,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 'View All',
                 style: GoogleFonts.poppins(
-                  color: AppTheme.primaryTeal,
+                  color: accent,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -387,13 +414,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildDonateNowButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       height: 56,
       decoration: BoxDecoration(
-        color: AppTheme.primaryGreen,
+        color: colorScheme.primary,
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        boxShadow: AppTheme.colorShadow(AppTheme.accentOrange),
+        boxShadow: AppTheme.colorShadow(colorScheme.primary),
       ),
       child: Material(
         color: Colors.transparent,
@@ -403,14 +431,18 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.favorite_rounded, color: Colors.white, size: 22),
+              Icon(
+                Icons.favorite_rounded,
+                color: colorScheme.onPrimary,
+                size: 22,
+              ),
               const SizedBox(width: 10),
               Text(
                 'Donate Now',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                 ),
               ),
             ],
@@ -421,15 +453,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: AppTheme.primaryTeal.withValues(alpha: 0.10),
+            color: colorScheme.primary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 18, color: AppTheme.primaryTeal),
+          child: Icon(icon, size: 18, color: colorScheme.primary),
         ),
         const SizedBox(width: 10),
         Text(
@@ -437,14 +470,14 @@ class _HomeScreenState extends State<HomeScreen> {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w700,
             fontSize: 16,
-            color: AppTheme.navy,
+            color: colorScheme.onSurface,
           ),
         ),
       ],
     );
   }
 
-  static const List<Map<String, dynamic>> _categories = [
+  static final List<Map<String, dynamic>> _categories = [
     {
       'key': 'food',
       'label': 'Food',
@@ -484,6 +517,9 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   Widget _buildCategoryGrid(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -507,7 +543,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? colorScheme.surface : Colors.white,
               borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               border: Border.all(color: color.withValues(alpha: 0.15)),
               boxShadow: [
@@ -544,7 +580,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   c['label'] as String,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.navy,
+                    color: colorScheme.onSurface,
                     fontSize: 12,
                   ),
                   textAlign: TextAlign.center,
@@ -558,6 +594,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNearYouHeader(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final accent = colorScheme.primary;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -566,13 +604,13 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppTheme.accentOrange.withValues(alpha: 0.10),
+                color: accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.location_on_rounded,
                 size: 18,
-                color: AppTheme.accentOrange,
+                color: accent,
               ),
             ),
             const SizedBox(width: 10),
@@ -581,7 +619,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
-                color: AppTheme.navy,
+                color: colorScheme.onSurface,
               ),
             ),
           ],
@@ -592,7 +630,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Text(
             'See All',
             style: GoogleFonts.poppins(
-              color: AppTheme.primaryTeal,
+              color: accent,
               fontWeight: FontWeight.w600,
               fontSize: 13,
             ),
@@ -633,9 +671,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNearYouList(BuildContext context) {
     if (_loading) {
-      return const SliverFillRemaining(
+      return SliverFillRemaining(
         child: Center(
-          child: CircularProgressIndicator(color: AppTheme.primaryTeal),
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
       );
     }
@@ -683,12 +723,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 Icon(
                   Icons.inbox_rounded,
                   size: 48,
-                  color: Colors.grey.shade300,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.35),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'No open requests near you.',
-                  style: GoogleFonts.poppins(color: AppTheme.textSecondary),
+                  style: GoogleFonts.poppins(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.72),
+                  ),
                 ),
               ],
             ),
@@ -749,11 +795,19 @@ class _HeaderIconButton extends StatelessWidget {
   const _HeaderIconButton({
     required this.icon,
     required this.onTap,
+    required this.foregroundColor,
+    required this.backgroundColor,
     this.showBadge = false,
+    this.badgeColor,
+    this.badgeBorderColor,
   });
   final IconData icon;
   final VoidCallback onTap;
+  final Color foregroundColor;
+  final Color backgroundColor;
   final bool showBadge;
+  final Color? badgeColor;
+  final Color? badgeBorderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -763,13 +817,13 @@ class _HeaderIconButton extends StatelessWidget {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.15),
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Icon(icon, color: Colors.white, size: 22),
+            Icon(icon, color: foregroundColor, size: 22),
             if (showBadge)
               Positioned(
                 right: 8,
@@ -778,9 +832,12 @@ class _HeaderIconButton extends StatelessWidget {
                   width: 9,
                   height: 9,
                   decoration: BoxDecoration(
-                    color: AppTheme.accentOrange,
+                    color: badgeColor ?? AppTheme.accentOrange,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 1.5),
+                    border: Border.all(
+                      color: badgeBorderColor ?? Colors.white,
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -805,15 +862,29 @@ class _FilterChipWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final selectedTextColor =
+        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+        ? Colors.white
+        : const Color(0xFF0B1220);
     return GestureDetector(
       onTap: () => onSelected(!selected),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? color : Colors.white,
+          color: selected
+              ? color
+              : (isDark ? theme.colorScheme.surface : Colors.white),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? color : Colors.grey.shade200),
+          border: Border.all(
+            color: selected
+                ? color
+                : (isDark
+                      ? theme.colorScheme.outline.withValues(alpha: 0.5)
+                      : Colors.grey.shade200),
+          ),
           boxShadow: selected ? AppTheme.colorShadow(color) : [],
         ),
         child: Text(
@@ -821,7 +892,9 @@ class _FilterChipWidget extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : AppTheme.textSecondary,
+            color: selected
+                ? selectedTextColor
+                : theme.colorScheme.onSurface.withValues(alpha: 0.72),
           ),
         ),
       ),

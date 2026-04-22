@@ -49,6 +49,8 @@ class PaymentScreen extends StatefulWidget {
 enum _PaymentMethod { card, esewa }
 
 class _PaymentScreenState extends State<PaymentScreen> {
+  static const double _usdToNprRate = 133.0;
+
   bool _paying = false;
   String? _error;
   _PaymentMethod _method = _PaymentMethod.card;
@@ -56,8 +58,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool get _isMoney => widget.donationType == 'money';
 
   /// Money uses these values; goods skip payment gateways.
-  double get _amountDollars => _isMoney ? widget.amount.toDouble() : 0;
-  int get _amountNpr => _isMoney ? widget.amount.clamp(1, 999999) : 0;
+  double get _amountDollars {
+    if (!_isMoney) return 0;
+    if (_method == _PaymentMethod.esewa) {
+      return (widget.amount / _usdToNprRate).clamp(0.5, 999999.99).toDouble();
+    }
+    return widget.amount.toDouble();
+  }
+
+  int get _amountNpr {
+    if (!_isMoney) return 0;
+    if (_method == _PaymentMethod.card) {
+      return (widget.amount * _usdToNprRate).round().clamp(1, 999999).toInt();
+    }
+    return widget.amount.clamp(1, 999999).toInt();
+  }
 
   Future<void> _pay() async {
     if (_paying) return;
@@ -114,7 +129,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
           if (_amountDollars < 0.5) {
             throw Exception('Minimum amount for card payment is \$0.50');
           }
-          await _payWithStripe(api, headers, requestId);
+          final paid = await _payWithStripe(api, headers, requestId);
+          if (!paid) {
+            if (mounted) setState(() => _paying = false);
+            return;
+          }
         }
       }
     } catch (e) {
@@ -170,14 +189,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
       rethrow;
     }
 
-    final productId = initData['product_id']?.toString() ?? '';
+    final productId =
+        initData['product_id']?.toString() ??
+        initData['productId']?.toString() ??
+        initData['transaction_uuid']?.toString() ??
+        '';
     final productName = initData['product_name']?.toString() ?? 'Donation';
     final productPrice = initData['amount']?.toString() ?? '1';
 
     if (productId.isEmpty) {
+      final detail =
+          initData['detail']?.toString() ??
+          initData['message']?.toString() ??
+          '';
       setState(() {
         _paying = false;
-        _error = 'Invalid response from server.';
+        _error = detail.isNotEmpty
+            ? 'eSewa init failed: $detail'
+            : 'Invalid response from server. Please check backend payment setup.';
       });
       return;
     }
@@ -195,7 +224,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           productId: productId,
           productName: productName,
           productPrice: productPrice,
-          callbackUrl: '',
+          callbackUrl: '${ApiConstants.baseUrl}/api/payments/esewa-callback/',
         ),
         onPaymentSuccess: (EsewaPaymentSuccessResult data) async {
           debugPrint('eSewa SUCCESS: ${data.productId}');
@@ -246,7 +275,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  Future<void> _payWithStripe(
+  Future<bool> _payWithStripe(
     ShareCareApiService api,
     Map<String, String> headers,
     int requestId,
@@ -281,8 +310,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (msg.contains('cancel') ||
           msg.contains('cancelled') ||
           msg.contains('user cancelled')) {
-        if (mounted) setState(() => _paying = false);
-        return;
+        return false;
       }
       if (msg.contains('paymentconfiguration') ||
           msg.contains('not initialized')) {
@@ -299,6 +327,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       donationRequestId: requestId,
       amount: amount,
     );
+
+    return true;
   }
 
   Future<void> _submitGoodsOffer(
@@ -353,7 +383,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Amount summary',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -387,7 +417,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           isMoney
                               ? displayAmount
                               : 'Goods (qty: ${widget.amount})',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                             color: AppTheme.primaryGreen,
@@ -401,7 +431,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             if (isMoney) ...[
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Payment gateway',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -535,10 +565,7 @@ class _PaymentOption extends StatelessWidget {
                 ),
               ),
               if (selected)
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: AppTheme.primaryGreen,
-                ),
+                Icon(Icons.check_circle_rounded, color: AppTheme.primaryGreen),
             ],
           ),
         ),

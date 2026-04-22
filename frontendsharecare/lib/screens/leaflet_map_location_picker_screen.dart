@@ -253,7 +253,7 @@ class _LeafletMapLocationPickerScreenState
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search address',
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.search_rounded,
                   color: AppTheme.primaryTeal,
                 ),
@@ -304,7 +304,7 @@ class _LeafletMapLocationPickerScreenState
                             point: _selectedPosition!,
                             width: 40.0,
                             height: 40.0,
-                            child: const Icon(
+                            child: Icon(
                               Icons.location_on,
                               color: AppTheme.primaryTeal,
                               size: 40,
@@ -384,7 +384,7 @@ class _LeafletMapLocationPickerScreenState
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(
+                            : Icon(
                                 Icons.my_location_rounded,
                                 color: AppTheme.primaryTeal,
                               ),

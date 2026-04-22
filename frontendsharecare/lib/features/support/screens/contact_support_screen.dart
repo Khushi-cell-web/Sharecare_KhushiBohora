@@ -54,7 +54,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
               'Support ticket submitted. We will get back to you soon.',
             ),
@@ -105,7 +105,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        borderSide: const BorderSide(color: AppTheme.primaryTeal, width: 2),
+        borderSide: BorderSide(color: AppTheme.primaryTeal, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -134,7 +134,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                 top: MediaQuery.of(context).padding.top + 16,
                 bottom: 44,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
@@ -577,26 +577,30 @@ class _ContactInfoRow extends StatelessWidget {
           child: Icon(icon, color: color, size: 17),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textSecondary,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                ),
               ),
-            ),
-            Text(
-              value,
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.navy,
+              Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.navy,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

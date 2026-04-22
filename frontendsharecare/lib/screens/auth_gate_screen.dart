@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../core/theme/app_theme.dart';
 import '../shared/providers/auth_provider.dart';
 import '../features/auth/screens/welcome_screen.dart';
@@ -20,24 +18,6 @@ class AuthGateScreen extends StatefulWidget {
 }
 
 class _AuthGateScreenState extends State<AuthGateScreen> {
-  bool? _hasSeenWelcome;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkFirstLaunch();
-  }
-
-  Future<void> _checkFirstLaunch() async {
-    final prefs = await SharedPreferences.getInstance();
-    final hasSeen = prefs.getBool('has_seen_welcome') ?? false;
-    if (mounted) {
-      setState(() {
-        _hasSeenWelcome = hasSeen;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -47,7 +27,7 @@ class _AuthGateScreenState extends State<AuthGateScreen> {
       return Scaffold(
         backgroundColor: AppTheme.backgroundLight,
         body: Container(
-          decoration: const BoxDecoration(gradient: AppTheme.headerGradient),
+          decoration: BoxDecoration(gradient: AppTheme.headerGradient),
           child: Center(
             child: Container(
               margin: const EdgeInsets.all(AppTheme.spaceXl),

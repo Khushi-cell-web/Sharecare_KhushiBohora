@@ -21,7 +21,7 @@ class HelpSupportScreen extends StatelessWidget {
                 top: MediaQuery.of(context).padding.top + 16,
                 bottom: 44,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),

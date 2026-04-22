@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../core/theme/app_theme.dart';
 import 'home_screen.dart';
 import 'role_dashboard_screen.dart';
 import 'donate_tab_screen.dart';
@@ -66,7 +65,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: IndexedStack(
         index: _currentIndex,
         children: [
@@ -101,24 +100,25 @@ class _FloatingBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? colorScheme.surface : Colors.white,
           borderRadius: BorderRadius.circular(32),
-          border: Border.all(
-            color: AppTheme.secondaryGreen.withValues(alpha: 0.12),
-          ),
+          border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primaryTeal.withValues(alpha: 0.12),
+              color: colorScheme.primary.withValues(alpha: isDark ? 0.16 : 0.12),
               blurRadius: 28,
               spreadRadius: 0,
               offset: const Offset(0, 6),
             ),
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withValues(alpha: isDark ? 0.24 : 0.06),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -136,6 +136,10 @@ class _FloatingBottomNav extends StatelessWidget {
                   icon: _items[i].icon,
                   label: _items[i].label,
                   isSelected: selected,
+                  selectedColor: colorScheme.primary,
+                  unselectedColor: colorScheme.onSurface.withValues(
+                    alpha: isDark ? 0.66 : 0.44,
+                  ),
                   onTap: () => onTap(i),
                 );
               }),
@@ -158,12 +162,16 @@ class _NavItem extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.isSelected,
+    required this.selectedColor,
+    required this.unselectedColor,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool isSelected;
+  final Color selectedColor;
+  final Color unselectedColor;
   final VoidCallback onTap;
 
   @override
@@ -183,8 +191,8 @@ class _NavItem extends StatelessWidget {
           gradient: isSelected
               ? LinearGradient(
                   colors: [
-                    AppTheme.primaryTeal.withValues(alpha: 0.15),
-                    AppTheme.primaryTeal.withValues(alpha: 0.06),
+                    selectedColor.withValues(alpha: 0.2),
+                    selectedColor.withValues(alpha: 0.08),
                   ],
                 )
               : null,
@@ -200,9 +208,7 @@ class _NavItem extends StatelessWidget {
               child: Icon(
                 icon,
                 size: isSelected ? 24 : 24,
-                color: isSelected
-                    ? AppTheme.primaryTeal
-                    : const Color(0xFFB0BEC5),
+                color: isSelected ? selectedColor : unselectedColor,
               ),
             ),
             if (isSelected) ...[
@@ -212,7 +218,7 @@ class _NavItem extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: AppTheme.primaryTeal,
+                  color: selectedColor,
                 ),
               ),
             ],

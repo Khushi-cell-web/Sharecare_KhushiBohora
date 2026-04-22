@@ -82,7 +82,7 @@ class _VolunteerTasksScreenState extends State<VolunteerTasksScreen> {
       body: RefreshIndicator(
         onRefresh: _loadTasks,
         child: _loading
-            ? const Center(
+            ? Center(
                 child: CircularProgressIndicator(color: AppTheme.primaryTeal),
               )
             : _error != null

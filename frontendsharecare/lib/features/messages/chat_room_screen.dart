@@ -91,7 +91,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   @override
   void initState() {
     super.initState();
-    print('Chat room opened with user: ${widget.receiverId}');
+    debugPrint('Chat room opened with user: ${widget.receiverId}');
     WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
   }
 
@@ -292,7 +292,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         appBar: AppBar(
           title: const Text('Chat'),
           backgroundColor: AppTheme.primaryGreen,
-          foregroundColor: Colors.white,
+          foregroundColor: AppTheme.primaryPinkDark,
         ),
         body: Center(
           child: Padding(
@@ -325,7 +325,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               top: MediaQuery.of(context).padding.top + 8,
               bottom: 16,
             ),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppTheme.primaryGreen,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(24),
@@ -409,7 +409,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           ),
           Expanded(
             child: _bootstrapping || (_loadingMessages && _messages.isEmpty)
-                ? const Center(
+                ? Center(
                     child: CircularProgressIndicator(
                       color: AppTheme.primaryTeal,
                     ),
@@ -578,7 +578,7 @@ class _MessageBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           gradient: isMe
-              ? const LinearGradient(
+              ? LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [AppTheme.primaryTeal, AppTheme.primaryTealDark],

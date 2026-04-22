@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/services/sharecare_api_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_routes.dart';
 import '../../../core/utils/network_error_helper.dart';
 import '../../../shared/providers/auth_provider.dart';
 import 'pickup_location_picker_screen.dart';
@@ -165,12 +166,12 @@ class _StandaloneDonationScreenState extends State<StandaloneDonationScreen> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Thank you! Your donation was recorded.'),
+        SnackBar(
+          content: Text('Thank you! Your donation is now pending NGO acceptance.'),
           backgroundColor: AppTheme.primaryGreen,
         ),
       );
-      Navigator.maybePop(context);
+      Navigator.of(context).pushReplacementNamed(AppRoutes.myDonationRecords);
     } catch (e) {
       if (mounted) {
         setState(() => _error = NetworkErrorHelper.toUserMessage(e));
@@ -199,7 +200,7 @@ class _StandaloneDonationScreenState extends State<StandaloneDonationScreen> {
             children: [
               Text(
                 'Create a general donation (not tied to a specific request). '
-                'Organizations may still be notified when volunteer pickup is requested.',
+                'It will first wait in the NGO review queue before any volunteer pickup is assigned.',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   color: Colors.grey[800],

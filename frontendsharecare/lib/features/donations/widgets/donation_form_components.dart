@@ -171,7 +171,11 @@ class PickupLocationField extends StatelessWidget {
       ),
     );
     if (result == null || !context.mounted) return;
-    controller.text = result.address;
+    // Use full TextEditingValue update to force immediate field refresh.
+    controller.value = TextEditingValue(
+      text: result.address,
+      selection: TextSelection.collapsed(offset: result.address.length),
+    );
     onLocationPicked?.call(result.latitude, result.longitude, result.address);
   }
 
@@ -286,7 +290,7 @@ class DatePickerField extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.event_rounded, color: AppTheme.primaryTeal),
+            Icon(Icons.event_rounded, color: AppTheme.primaryTeal),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

@@ -49,7 +49,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Password updated successfully'),
             backgroundColor: AppTheme.statusSuccess,
           ),
@@ -96,7 +96,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 AppTheme.spaceLg,
                 AppTheme.spaceXl,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(28),
@@ -169,7 +169,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         decoration: InputDecoration(
                           labelText: 'New Password',
                           border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.lock_outline,
                             color: AppTheme.primaryTeal,
                           ),
@@ -200,7 +200,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         decoration: InputDecoration(
                           labelText: 'Confirm Password',
                           border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.lock_outline,
                             color: AppTheme.primaryTeal,
                           ),

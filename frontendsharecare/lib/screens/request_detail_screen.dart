@@ -58,8 +58,41 @@ class RequestDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final request =
-        ModalRoute.of(context)!.settings.arguments! as DonationRequest;
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is! DonationRequest) {
+      return Scaffold(
+        backgroundColor: AppTheme.backgroundLight,
+        appBar: AppBar(title: const Text('Request Details')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Request details are unavailable for this notification.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                FilledButton(
+                  onPressed: () {
+                    Navigator.of(
+                      context,
+                    ).pushReplacementNamed(AppRoutes.browseDonationRequests);
+                  },
+                  child: const Text('Browse Requests'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    final request = args;
     final auth = context.watch<AuthProvider>();
     final color = _catColor(request.category);
     final isUrgent = request.urgency == 'High';

@@ -86,7 +86,7 @@ class _FaqScreenState extends State<FaqScreen> {
                 top: MediaQuery.of(context).padding.top + 16,
                 bottom: 36,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),
@@ -152,7 +152,7 @@ class _FaqScreenState extends State<FaqScreen> {
             ),
           ),
           if (_loading)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               child: Center(
                 child: CircularProgressIndicator(color: AppTheme.primaryTeal),
               ),

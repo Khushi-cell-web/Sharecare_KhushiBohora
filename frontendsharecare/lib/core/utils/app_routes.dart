@@ -24,6 +24,7 @@ class AppRoutes {
   static const String categoryListing = '/donations/categories';
   static const String searchFilter = '/donations/search-filter';
   static const String donationHistory = '/donations/history';
+  static const String myDonationRecords = '/donations/my-records';
   static const String requestHistory = '/ngo/request-history';
   static const String emptyState = '/empty';
 
@@ -42,6 +43,7 @@ class AppRoutes {
   static const String updateTaskStatus = '/volunteer/update-task-status';
   static const String deliveryTaskTracking = '/volunteer/delivery-tracking';
   static const String taskHistory = '/volunteer/task-history';
+  static const String rewards = '/volunteer/rewards';
 
   // NGO
   static const String manageMyRequests = '/ngo/manage-requests';

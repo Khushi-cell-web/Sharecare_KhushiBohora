@@ -117,7 +117,9 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final isNgo = auth.user?.role == 'ngo' || auth.user?.role == 'admin';
+    final role = auth.user?.role?.toLowerCase();
+    final isNgo =
+      role == 'ngo' || role == 'hospital' || role == 'admin';
     if (!isNgo) {
       return Scaffold(
         appBar: AppBar(title: const Text('Create donation request')),
@@ -230,9 +232,15 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                 hintText: 'Tap to pick on map or search address',
                 initialLat: _pickupLat,
                 initialLng: _pickupLng,
-                onLocationPicked: (lat, lng, _) => setState(() {
+                onLocationPicked: (lat, lng, address) => setState(() {
                   _pickupLat = lat;
                   _pickupLng = lng;
+                  _locationController.value = TextEditingValue(
+                    text: address,
+                    selection: TextSelection.collapsed(
+                      offset: address.length,
+                    ),
+                  );
                 }),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Required' : null,

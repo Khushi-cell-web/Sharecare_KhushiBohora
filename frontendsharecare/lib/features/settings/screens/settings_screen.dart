@@ -32,7 +32,7 @@ class SettingsScreen extends StatelessWidget {
         right: 20,
         bottom: 40,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppTheme.primaryGreen,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(32),
@@ -86,6 +86,10 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildMenuCard(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final isVolunteer = auth.user?.role == 'volunteer';
+    final isDonor = auth.user?.role == 'donor';
+
     return Transform.translate(
       offset: const Offset(0, -20),
       child: Padding(
@@ -114,6 +118,17 @@ class SettingsScreen extends StatelessWidget {
                     context,
                   ).pushNamed(AppRoutes.notificationPreferences),
                 ),
+                if (isVolunteer || isDonor)
+                  _MenuItem(
+                    icon: Icons.card_giftcard_rounded,
+                    label: 'Rewards',
+                    gradientColors: [
+                      AppTheme.accentYellow,
+                      const Color(0xFFF59E0B),
+                    ],
+                    onTap: () =>
+                        Navigator.of(context).pushNamed(AppRoutes.rewards),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
@@ -382,12 +397,12 @@ class _ThemeOption extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF0F172A).withOpacity(0.05)
+              ? const Color(0xFF0F172A).withValues(alpha: 0.05)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF0F172A).withOpacity(0.2)
+                ? const Color(0xFF0F172A).withValues(alpha: 0.2)
                 : Colors.transparent,
           ),
         ),

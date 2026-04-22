@@ -112,7 +112,7 @@ class ErrorStateWidget extends StatelessWidget {
                 label: const Text('Retry'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.primaryTeal,
-                  side: const BorderSide(color: AppTheme.primaryTeal),
+                  side: BorderSide(color: AppTheme.primaryTeal),
                 ),
               ),
             ],

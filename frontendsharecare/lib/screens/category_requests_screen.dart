@@ -116,7 +116,7 @@ class _CategoryRequestsScreenState extends State<CategoryRequestsScreen> {
                 top: MediaQuery.of(context).padding.top + 12,
                 bottom: 20,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(24),
@@ -169,7 +169,7 @@ class _CategoryRequestsScreenState extends State<CategoryRequestsScreen> {
                     children: [
                       TextButton(
                         onPressed: () => _navigateToCategoryDonation(context),
-                        child: const Text(
+                        child: Text(
                           'Donate here',
                           style: TextStyle(
                             color: AppTheme.primaryGreen,
@@ -181,7 +181,7 @@ class _CategoryRequestsScreenState extends State<CategoryRequestsScreen> {
                         onPressed: () => Navigator.of(
                           context,
                         ).pushNamed(AppRoutes.searchFilter),
-                        child: const Text(
+                        child: Text(
                           'Filter',
                           style: TextStyle(
                             color: AppTheme.primaryGreen,
@@ -304,7 +304,7 @@ class _RequestCard extends StatelessWidget {
                     color: AppTheme.impactGreen,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Verified',
                     style: TextStyle(
                       fontSize: 12,

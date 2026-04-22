@@ -4,7 +4,6 @@ import '../../../core/theme/app_theme.dart';
 import 'volunteer_dashboard_tab.dart';
 import 'volunteer_available_tab.dart';
 import 'volunteer_assigned_tab.dart';
-import 'volunteer_rewards_tab.dart';
 import 'volunteer_map_tab.dart';
 import '../../profile/screens/view_profile_screen.dart';
 
@@ -23,7 +22,6 @@ class _VolunteerHubScreenState extends State<VolunteerHubScreen> {
     _NavItem(icon: Icons.home_rounded, label: 'Home'),
     _NavItem(icon: Icons.inventory_2_outlined, label: 'Available'),
     _NavItem(icon: Icons.assignment_rounded, label: 'Assigned'),
-    _NavItem(icon: Icons.card_giftcard_rounded, label: 'Rewards'),
     _NavItem(icon: Icons.map_rounded, label: 'Map'),
     _NavItem(icon: Icons.person_rounded, label: 'Profile'),
   ];
@@ -43,7 +41,6 @@ class _VolunteerHubScreenState extends State<VolunteerHubScreen> {
           VolunteerDashboardTab(onSwitchTab: _switchToTab),
           const VolunteerAvailableTab(),
           const VolunteerAssignedTab(),
-          const VolunteerRewardsTab(),
           const VolunteerMapTab(),
           const ViewProfileScreen(showBackButton: false),
         ],

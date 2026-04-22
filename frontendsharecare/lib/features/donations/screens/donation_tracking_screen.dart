@@ -42,7 +42,7 @@ class DonationTrackingScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Your donation status',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,

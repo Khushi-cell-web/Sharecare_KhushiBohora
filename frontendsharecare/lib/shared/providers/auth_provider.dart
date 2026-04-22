@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/user_model.dart';
 import '../../core/services/sharecare_api_service.dart';
+import '../../core/services/health_check_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/utils/network_error_helper.dart';
 
@@ -13,7 +14,7 @@ class AuthProvider extends ChangeNotifier {
       _api = api ?? ShareCareApiService();
 
   final FlutterSecureStorage _storage;
-  final ShareCareApiService _api;
+  ShareCareApiService _api;
 
   static const _keyAccessToken = 'sharecare_access_token';
   static const _keyRefreshToken = 'sharecare_refresh_token';
@@ -23,6 +24,10 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   UserModel? _user;
+
+  void _refreshApiClientFromRuntime() {
+    _api = ShareCareApiService();
+  }
 
   String? get accessToken => _accessToken;
   String? get refreshToken => _refreshToken;
@@ -118,6 +123,39 @@ class AuthProvider extends ChangeNotifier {
     } on ShareCareApiException catch (e) {
       _error = NetworkErrorHelper.toUserMessage(e);
     } catch (e) {
+      // If the first login fails due a bad host selection, probe backend health
+      // and retry once with the runtime-resolved base URL.
+      final raw = e.toString().toLowerCase();
+      final looksLikeConnectivityIssue =
+          raw.contains('socketexception') ||
+          raw.contains('clientexception') ||
+          raw.contains('connection timed out') ||
+          raw.contains('connection refused') ||
+          raw.contains('failed host lookup') ||
+          raw.contains('timed out');
+
+      if (looksLikeConnectivityIssue) {
+        try {
+          final (connected, _) = await HealthCheckService().check();
+          if (connected) {
+            _refreshApiClientFromRuntime();
+            final retriedData = await _api.login(username, password);
+            final access = retriedData['access'] as String?;
+            final refresh = retriedData['refresh'] as String?;
+            if (access != null && refresh != null) {
+              await saveTokens(access: access, refresh: refresh);
+              await loadUser();
+              _registerFcmToken();
+              _isLoading = false;
+              notifyListeners();
+              return true;
+            }
+          }
+        } catch (_) {
+          // Fall through to normal mapped error below.
+        }
+      }
+
       _error = NetworkErrorHelper.toUserMessage(e);
     }
     if (_error != null &&

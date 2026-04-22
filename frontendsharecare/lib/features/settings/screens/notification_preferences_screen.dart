@@ -30,7 +30,7 @@ class _NotificationPreferencesScreenState
                 top: MediaQuery.of(context).padding.top + 16,
                 bottom: 36,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppTheme.primaryGreen,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(32),

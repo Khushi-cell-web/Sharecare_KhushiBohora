@@ -83,7 +83,7 @@ class _DonationDetailsScreenState extends State<DonationDetailsScreen> {
               children: [
                 Text(
                   req.category.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: SoftTheme.primaryTeal,
                     letterSpacing: 1.2,
@@ -127,7 +127,7 @@ class _DonationDetailsScreenState extends State<DonationDetailsScreen> {
             // Subtitle info
             Row(
               children: [
-                const Icon(Icons.person, size: 16, color: SoftTheme.textLight),
+                Icon(Icons.person, size: 16, color: SoftTheme.textLight),
                 const SizedBox(width: 8),
                 Text(
                   'By ${req.organizationName ?? req.requestedByLabel ?? 'Unknown'}',
@@ -138,7 +138,7 @@ class _DonationDetailsScreenState extends State<DonationDetailsScreen> {
             const SizedBox(height: 24),
 
             if (_progressLoading)
-              const Center(
+              Center(
                 child: CircularProgressIndicator(color: SoftTheme.primaryTeal),
               )
             else
@@ -163,7 +163,7 @@ class _DonationDetailsScreenState extends State<DonationDetailsScreen> {
                           const SizedBox(height: 4),
                           Text(
                             amountText,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: SoftTheme.primaryTeal,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -197,7 +197,7 @@ class _DonationDetailsScreenState extends State<DonationDetailsScreen> {
                     label: 'Location',
                     value: req.location,
                   ),
-                  const Divider(height: 24, color: SoftTheme.background),
+                  Divider(height: 24, color: SoftTheme.background),
                   _DetailRow(
                     icon: Icons.warning_amber_rounded,
                     label: 'Urgency',

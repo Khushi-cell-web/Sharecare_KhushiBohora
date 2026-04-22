@@ -238,7 +238,7 @@ class _OfferDonationScreenState extends State<OfferDonationScreen> {
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         _pickAddress,
-                        style: const TextStyle(color: AppTheme.primaryTeal),
+                        style: TextStyle(color: AppTheme.primaryTeal),
                       ),
                     ),
                 ],

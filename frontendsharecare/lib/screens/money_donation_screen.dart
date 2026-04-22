@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/theme/app_theme.dart';
 
 class MoneyDonationScreen extends StatelessWidget {
   const MoneyDonationScreen({super.key});
@@ -9,13 +10,17 @@ class MoneyDonationScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Donate Funds'),
-        backgroundColor: Colors.green[700],
+        backgroundColor: AppTheme.primaryPinkDark,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.monetization_on, size: 80, color: Colors.green[700]),
+            Icon(
+              Icons.monetization_on,
+              size: 80,
+              color: AppTheme.primaryPinkDark,
+            ),
             const SizedBox(height: 24),
             Text(
               'Fund Donation System',
